@@ -28,10 +28,8 @@ def hello():
 
 def makeWebhookResult(req):
 	speech = "Hi, Vidal!"
-	return {
-  "fulfillmentText": speech,
-  "source": 'Vidal\'s Mind!'
-}
+	return {"fulfillmentText": speech,
+            "source": 'Vidal\'s Mind!'}
 
 
 
@@ -41,21 +39,21 @@ if __name__ == '__main__':
 
 
 
-{
-        "jurisdiction_id": jurisdiction_id,
-        "service_code": service_code,
-        "attribute": attribute,
-        "description": description,
-        "lat": lat,
-        "long": long_,
-        "address_string": address_string,
-        "address_id": address_id,
-        "email": email,
-        "device_id": device_id,
-        "accont_id": account_id,
-        "first_name": first_name,
-        "last_name": last_name,
-        "phone": phone,
-        "description": description,
-        "media_url": media_url
-    }
+# {
+#         "jurisdiction_id": jurisdiction_id,
+#         "service_code": service_code,
+#         "attribute": attribute,
+#         "description": description,
+#         "lat": lat,
+#         "long": long_,
+#         "address_string": address_string,
+#         "address_id": address_id,
+#         "email": email,
+#         "device_id": device_id,
+#         "accont_id": account_id,
+#         "first_name": first_name,
+#         "last_name": last_name,
+#         "phone": phone,
+#         "description": description,
+#         "media_url": media_url
+#     }
