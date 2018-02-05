@@ -17,7 +17,7 @@ def webhook():
 	r = make_response(res)
 	r.headers['Content-Type'] = 'application/json'
 	
-	return req
+	return r
 
 @app.route('/', methods=['GET'])
 def hello():
@@ -35,4 +35,4 @@ def makeWebhookResult(req):
 
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
