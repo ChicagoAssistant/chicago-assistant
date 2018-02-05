@@ -6,6 +6,7 @@ from flask import request
 from flask import make_response
 
 app = Flask(__name__)
+api_url = 'http://test311api.cityofchicago.org/open311/v2'
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -28,11 +29,33 @@ def hello():
 def makeWebhookResult(req):
 	speech = "Hi, Vidal!"
 	return {
-		'speech': speech,
-		'displayText': speech,
-		'source': 'Vidal\'s Mind'
-	}
+  "fulfillmentText": speech,
+  "source": 'Vidal\'s Mind!'
+}
+
 
 
 if __name__ == '__main__':
 	app.run(debug=True)
+
+
+
+
+{
+        "jurisdiction_id": jurisdiction_id,
+        "service_code": service_code,
+        "attribute": attribute,
+        "description": description,
+        "lat": lat,
+        "long": long_,
+        "address_string": address_string,
+        "address_id": address_id,
+        "email": email,
+        "device_id": device_id,
+        "accont_id": account_id,
+        "first_name": first_name,
+        "last_name": last_name,
+        "phone": phone,
+        "description": description,
+        "media_url": media_url
+    }
