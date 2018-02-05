@@ -19,6 +19,9 @@ def webhook():
 	
 	return req
 
+@app.route('/', methods=['GET'])
+def hello():
+	return "Hello World!"
 # def makeWebhokResult(req):
 # 	pri
 
