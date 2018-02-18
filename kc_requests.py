@@ -175,24 +175,24 @@ def is_url_ok_to_follow(url, limiting_domain):
         that include an "@" are not OK to follow.
     '''
     if "mailto:" in url:
-        # print("email address error")
+        print("email address error")
         return False
 
     if "@" in url:
-        # print("@ sign error")
+        print("@ sign error")
         return False
 
     parsed_url = urllib.parse.urlparse(url)
     if parsed_url.scheme != "http" and parsed_url.scheme != "https":
-        # print("http/ https error")
+        print("http/ https error")
         return False
 
     if parsed_url.netloc == "":
-        # print("netloc error")
+        print("netloc error")
         return False
 
     if parsed_url.fragment != "":
-        # print("fragment error")
+        print("fragment error")
         return False
 
     # if parsed_url.query != "":
@@ -202,12 +202,11 @@ def is_url_ok_to_follow(url, limiting_domain):
     ld = len(limiting_domain)
     trunc_loc = loc[-(ld+1):]
     if not (limiting_domain == loc or (trunc_loc == "." + limiting_domain)):
-        # print("loc error")
+        print("loc error")
         return False
 
     # does it have the right extension
     (filename, ext) = os.path.splitext(parsed_url.path)
-    # print(ext)
     return (ext == "" or ext == ".cfm")
 
 
@@ -225,21 +224,19 @@ def go(kc_csv):
              including raw text comments
     '''
     kc_df = import_kc(kc_csv)
-    # print("made df")
+
     max_pages = kc_df.shape[0]
-    # print("set max_pages")
+
     # initialize queue to hold links to scrape
     kc_queue = queue.Queue()
-    # print("made queue")
+
     # initialize set to check whether a link has been visited
     visited_set = set()
-    # print("made set")
+
     # initialize counter for pages visited
     pages_visited = 0
-    # print("started page count")
 
     for link in kc_df["CASE URL"]:
-        # print("New link to queue", link)
         queue_kc_links(link, kc_queue, visited_set)
 
     print("Is queue empty?", kc_queue.empty())
@@ -263,18 +260,4 @@ def go(kc_csv):
 
 
 if __name__ == "__main__":
-    # usage = "python3 kc_requests.py <number of pages to crawl>"
-    # args_len = len(sys.argv)
-    # if args_len == 1:
-    #     num_pages_to_crawl = 1000
-    # elif args_len == 2:
-    #     try:
-    #         num_pages_to_crawl = int(sys.argv[1])
-    #     except ValueError:
-    #         print(usage)
-    #         sys.exit(0)
-    # else:
-    #     print(usage)
-    #     sys.exit(0)
-
     go(kc_csv)
