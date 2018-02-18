@@ -18,9 +18,6 @@ def import_training_datasets(dataset_urls, save_to_filenames):
     for data_url in dataset_urls:
         filename = save_to_filenames.pop(0)
         if not os.path.isfile(filename):
-            #     with requests.Session() as sesh:
-            #     download = sesh.get(dataset_url)
-            #     decoded_content = download.content.decode('utf-8')
             download = requests.get(data_url)
 
             # Continue if "success" response code
@@ -29,10 +26,7 @@ def import_training_datasets(dataset_urls, save_to_filenames):
                     # A chunk of 128 bytes
                     for chunk in download:
                         f.write(chunk)
-                        # f.writelines(download.content)
 
-                # df = pd.read_csv(io.StringIO(download.text))
-                # df = pd.read_csv(decoded_content, header = 0)
                 print()
                 print(filename)
                 df = pd.read_csv(filename, header = 0)
