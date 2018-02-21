@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from flask import request
 from flask import make_response
+from flask import render_template
 
 app = Flask(__name__)
 api_url = 'http://test311api.cityofchicago.org/open311/v2'
