@@ -26,6 +26,10 @@ def hello():
 # def makeWebhokResult(req):
 # 	pri
 
+@app.route('/test')
+def test():
+    return render_template('page.html')
+
 def makeWebhookResult(req):
 	speech = "Hi, Vidal!"
 	return {"fulfillmentText": speech,
