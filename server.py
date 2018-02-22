@@ -13,6 +13,8 @@ api_url = 'http://test311api.cityofchicago.org/open311/v2'
 def webhook():
 	req = request.get_json(silent = True, force = True)
 	print('Request:\n', json.dumps(req, indent=4))
+	with open('data.json', 'w') as f:
+     json.dump(req, f)
 	res = makeWebhookResult(req)
 	res = json.dumps(res, indent=4)
 	print(res)
