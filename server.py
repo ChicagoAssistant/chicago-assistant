@@ -34,7 +34,7 @@ def test():
     return render_template('page.html')
 
 def makeWebhookResult(req):
-    if req['requltQuery']['action'] == 'name.collected':
+    if req['queryResult']['action'] == 'name.collected':
         return {'event':{'name': 'custom_event', 'data': {'name': 'Sam'}}}
     else:
         speech = "Hi, Vidal!"
