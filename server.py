@@ -34,8 +34,7 @@ def test():
     return render_template('page.html')
 
 def makeWebhookResult(req):
-    j_dict = json.loads(req)
-    if j_dict['requltQuery']['action'] == 'name.collected':
+    if req['requltQuery']['action'] == 'name.collected':
         return {'event':{'name': 'custom_event', 'data': {'name': 'Sam'}}}
     else:
         speech = "Hi, Vidal!"
