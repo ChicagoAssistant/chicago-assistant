@@ -34,9 +34,16 @@ def test():
     return render_template('page.html')
 
 def makeWebhookResult(req):
-    if req['result']['action'] == 'name.collected':
-        return {"followupEvent": {
-                "name": 'custom_event',
+    if req['result']['action'] in ['name.collected','name.not.collected']:
+        if req['result']['parameters']['service-type'] == 'pothole':
+            return {"followupEvent": {
+                "name": 'pothole_request',
+                "data": {
+                "nombre":"Vidal"}}
+                }
+        if req['result']['parameters']['service-type'] == 'rodent':
+            return {"followupEvent": {
+                "name": 'rodent_request',
                 "data": {
                 "nombre":"Vidal"}}
                 }
