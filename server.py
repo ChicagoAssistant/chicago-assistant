@@ -36,9 +36,9 @@ def test():
 def makeWebhookResult(req):
     if req['queryResult']['action'] == 'name.collected':
         return {"followupEvent": {
-      "name": 'custom_event',
-      "data": {
-         "nombre":"Vidal"}}}
+                "name": 'custom_event',
+                "data": {
+                "nombre":"Vidal"}}}
     else:
         speech = "Hi, Vidal!"
         return {"fulfillmentText": speech,
