@@ -11,21 +11,21 @@ api_url = 'http://test311api.cityofchicago.org/open311/v2'
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-	req = request.get_json(silent = True, force = True)
-	print('Request:\n', json.dumps(req, indent=4))
-	with open('data.json', 'w') as f:
+    req = request.get_json(silent = True, force = True)
+    print('Request:\n', json.dumps(req, indent=4))
+    with open('data.json', 'w') as f:
         json.dump(req, f)
-	res = makeWebhookResult(req)
-	res = json.dumps(res, indent=4)
-	print(res)
-	r = make_response(res)
-	r.headers['Content-Type'] = 'application/json'
-	
-	return r
+    res = makeWebhookResult(req)
+    res = json.dumps(res, indent=4)
+    print(res)
+    r = make_response(res)
+    r.headers['Content-Type'] = 'application/json'
+
+    return r
 
 @app.route('/', methods=['GET'])
 def hello():
-	return "Hello World!"
+    return "Hello World!"
 # def makeWebhokResult(req):
 # 	pri
 
@@ -34,8 +34,8 @@ def test():
     return render_template('page.html')
 
 def makeWebhookResult(req):
-	speech = "Hi, Vidal!"
-	return {"fulfillmentText": speech,
+    speech = "Hi, Vidal!"
+    return {"fulfillmentText": speech,
             "source": 'Vidal\'s Mind!'}
 
 
