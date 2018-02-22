@@ -38,7 +38,8 @@ def makeWebhookResult(req):
         return {"followupEvent": {
                 "name": 'custom_event',
                 "data": {
-                "nombre":"Vidal"}}}
+                "nombre":"Vidal"}}
+                }
     else:
         speech = "Hi, Vidal!"
         return {"fulfillmentText": speech,
