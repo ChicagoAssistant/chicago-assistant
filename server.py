@@ -34,17 +34,17 @@ def test():
     return render_template('page.html')
 
 def makeWebhookResult(req):
-    # if req['queryResult']['action'] == 'name.collected':
-    #     return {"followupEvent": {
-    #             "name": 'custom_event',
-    #             "data": {
-    #             "nombre":"Vidal"}}
-    #             }
-    # else:
+    if req['queryResult']['action'] == 'name.collected':
+        return {"followupEvent": {
+                "name": 'custom_event',
+                "data": {
+                "nombre":"Vidal"}}
+                }
+    else:
     
-    speech = "Hi, Vidal!"
-    return {"fulfillmentText": speech,
-        "source": 'Vidal\'s Mind!'}
+        speech = "Hi, Vidal!"
+        return {"fulfillmentText": speech,
+            "source": 'Vidal\'s Mind!'}
 
 
 
