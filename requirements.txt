@@ -4,10 +4,3 @@ gunicorn==19.6.0
 apiai
 psycopg2
 configparser
-urllib.parse
-os
-bs4
-pandas
-csv
-queue
-re
