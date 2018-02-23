@@ -47,7 +47,7 @@ def makeWebhookResult(req):
                 "data": {
                 "nombre":"Vidal"}}
                 }
-    if req['result']['action'] == 'request.completed':
+    if req['result']['action'] == 'request.complete':
         return {"followupEvent": {
                 "name": 'completion_time',
                 "data": {
