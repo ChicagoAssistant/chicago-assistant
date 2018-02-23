@@ -47,6 +47,12 @@ def makeWebhookResult(req):
                 "data": {
                 "nombre":"Vidal"}}
                 }
+    if req['result']['action'] == 'request.completed':
+        return {"followupEvent": {
+                "name": 'completion_time',
+                "data": {
+                "days":"5"}}
+                }
     else:
 
         speech = "Hi, Vidal!"
