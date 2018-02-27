@@ -42,22 +42,22 @@ def makeWebhookResult(req):
     # elif req['result']['action'] == 'notification':
     elif req['result']['action'] == 'get.address':
         gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
-        print(GMAPS_PLACES_APPTOKEN)
-        print(gmaps)
         address = req['result']['parameters']['address']
-        print(address)
         if 'Chicago' not in address:
             address += ' Chicago, IL'
         results = gmaps.places_autocomplete(address)
-        print('GMAPS RESULTS\n',results,'\n',address)
-        if results:
+        if len(results) == 1:
             return followupEvent(req)
         else:
+            addresses = ['','','']
+            for num, result in enumerate(results[:3]):
+                address = result['structured_formatting']['main_text']
+                addresses[num] = address
             return {"followupEvent": {
                 "name": "address-correct",
-                "data": {"address1" : "it",
-                         "address2" : "freaken",
-                         "address3" : "worked!"}}
+                "data": {"address1" : addresses[0],
+                         "address2" : addresses[1],
+                         "address3" : addresses[2]}}
                    }
     elif req['result']['action'] == 'request.complete':
         return {"followupEvent": {
