@@ -5,9 +5,11 @@ from flask import Flask
 from flask import request
 from flask import make_response
 from flask import render_template
+import goooglemaps
 
 app = Flask(__name__)
 api_url = 'http://test311api.cityofchicago.org/open311/v2'
+GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -34,31 +36,50 @@ def test():
 
 def makeWebhookResult(req):
     if req['result']['action'] in ['name.collected','name.not.collected']:
-        if req['result']['parameters']['service-type'] == 'pothole':
+        return {"followupEvent": {
+                "name": 'get-address'}
+                   }
+    # elif req['result']['action'] == 'notification':
+    elif req['result']['action'] == 'get.address':
+        gmaps = goooglemaps.Client(key=GMAPS_PLACES_APPTOKEN)
+        address = req['result']['parameters']['address']
+        if 'Chicago' not in address:
+            address += ' Chicago, IL'
+        if gmaps.places_autocomplete(address, types='address', strict_bounds=True):
+            return followupEvent(req)
+        else:
             return {"followupEvent": {
-                "name": 'pothole_request',
-                "data": {
-                "nombre":"Vidal"}}
-                }
-        if req['result']['parameters']['service-type'] == 'rodent':
-            return {"followupEvent": {
-                "name": 'rodent_request',
-                "data": {
-                "nombre":"Vidal"}}
-                }
+                "name": "address-correct",
+                "data": {"address1" : "it",
+                         "address2" : "freaken",
+                         "address3" : "worked!"}}
+                   }
     elif req['result']['action'] == 'request.complete':
         return {"followupEvent": {
                 "name": 'completion_time',
                 "data": {
                 "days":"5"}}
                 }
+    elif req['result']['action'] == 'address.corrected':
+        return followupEvent(req)
     else:
-
         speech = "Hi, Vidal!"
         return {"fulfillmentText": speech,
             "source": 'Vidal\'s Mind!'}
 
-
+def followupEvent(req):
+    if req['result']['parameters']['service-type'] == 'pothole':
+        return {"followupEvent": {
+                "name": 'pothole_request'}
+                   }
+    if req['result']['parameters']['service-type'] == 'rodent':
+        return {"followupEvent": {
+                "name": 'rodent_request'}
+                   }
+    if req['result']['parameters']['service-type'] == 'street light':
+        return {"followupEvent": {
+                "name": 'street_light_request'}
+                   }
 
 if __name__ == '__main__':
 	app.run(debug=True)

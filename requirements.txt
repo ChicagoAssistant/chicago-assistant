@@ -4,3 +4,4 @@ gunicorn==19.6.0
 apiai
 psycopg2
 configparser
+googlemaps
