@@ -25,7 +25,9 @@ def webhook():
 
 @app.route('/', methods=['GET'])
 def hello():
-    return "Hello World!"
+    key = str(os.environ['TEST_KEY'])
+    return key
+    # return "Hello World!"
 # def makeWebhokResult(req):
 # 	pri
 
@@ -47,7 +49,7 @@ def makeWebhookResult(req):
                 "data": {
                 "nombre":"Vidal"}}
                 }
-    if req['result']['action'] == 'request.complete':
+    elif req['result']['action'] == 'request.complete':
         return {"followupEvent": {
                 "name": 'completion_time',
                 "data": {
