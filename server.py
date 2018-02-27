@@ -43,10 +43,16 @@ def makeWebhookResult(req):
     elif req['result']['action'] == 'get.address':
         gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
         address = req['result']['parameters']['address']
+        if 'and' in address or '&' in address:
+            return followupEvent(req)
         if 'Chicago' not in address:
             address += ' Chicago, IL'
         results = gmaps.places_autocomplete(address)
-        if len(results) == 1:
+        if len(results) == 0:
+            return {"followupEvent": {
+                "name": 'get-address'}
+                   }
+        elif len(results) == 1:
             return followupEvent(req)
         else:
             addresses = ['','','']
