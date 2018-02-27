@@ -45,7 +45,9 @@ def makeWebhookResult(req):
         address = req['result']['parameters']['address']
         if 'Chicago' not in address:
             address += ' Chicago, IL'
-        if gmaps.places_autocomplete(address, types='address', strict_bounds=True):
+        results = gmaps.places_autocomplete(address, types='address', strict_bounds=True)
+        print('GMAPS RESULTS\n',results,'\n',address)
+        if results:
             return followupEvent(req)
         else:
             return {"followupEvent": {
