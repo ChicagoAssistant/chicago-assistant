@@ -18,6 +18,7 @@ def import_training_datasets(dataset_urls, req_cities, cols_to_keep):
     '''
     training_columns = ['service_type', 'description']
     all_city_reqs = pd.DataFrame(columns = training_columns)
+    df_list = []
     for data_url in dataset_urls:
         filename = req_cities.pop(0)
         download = requests.get(data_url)
@@ -33,9 +34,10 @@ def import_training_datasets(dataset_urls, req_cities, cols_to_keep):
             city_df = city_df[cols_to_keep[filename]]
             city_df.columns = all_city_reqs.columns
 
-            print()
+            print(filename)
             print(city_df.head())
-            all_city_reqs = all_city_reqs.append(city_df, ignore_index = True)
+            df_list.append(city_df)
+    all_city_reqs = all_city_reqs.concat(df_list, ignore_index = True)
 
     return all_city_reqs
 
