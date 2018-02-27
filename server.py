@@ -25,11 +25,8 @@ def webhook():
 
 @app.route('/', methods=['GET'])
 def hello():
-    key = str(os.environ['TEST_KEY'])
-    return key
-    # return "Hello World!"
-# def makeWebhokResult(req):
-# 	pri
+    return "Hello World!"
+
 
 @app.route('/test')
 def test():
