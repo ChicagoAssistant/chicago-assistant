@@ -41,7 +41,7 @@ def makeWebhookResult(req):
                    }
     # elif req['result']['action'] == 'notification':
     elif req['result']['action'] == 'get.address':
-        gmaps = goooglemaps.Client(key=GMAPS_PLACES_APPTOKEN)
+        gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
         address = req['result']['parameters']['address']
         if 'Chicago' not in address:
             address += ' Chicago, IL'
