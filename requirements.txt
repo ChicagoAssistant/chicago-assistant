@@ -5,3 +5,4 @@ apiai
 psycopg2
 configparser
 sodapy
+googlemaps
