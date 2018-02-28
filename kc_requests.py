@@ -7,32 +7,39 @@ import csv
 import queue
 import re
 
+KC_URL = 'https://data.kcmo.org/api/views/7at3-sxhp/rows.csv?accessType=DOWNLOAD'
 
-def import_kc(kc_csv):
+def import_kc(kc_url):
     '''
     Create pandas data frame from list of Kansas City service requests
     '''
-    if kc_csv:
-        kc_requests = pd.read_csv(kc_csv, header = 0, usecols = ['CASE ID',
-                                                                'SOURCE',
-                                                                'REQUEST TYPE',
-                                                                'CATEGORY',
-                                                                'TYPE',
-                                                                'CREATION DATE',
-                                                                'CREATION TIME',
-                                                                'ADDRESS WITH GEOCODE',
-                                                                'ZIP CODE',
-                                                                'NEIGHBORHOOD',
-                                                                'LATITUDE',
-                                                                'LONGITUDE',
-                                                                'CASE URL'])
+    kc_cols_to_keep = ['CASE ID','SOURCE', 'REQUEST TYPE', 'CATEGORY', 'TYPE',
+                       'CREATION DATE', 'CREATION TIME', 'ADDRESS WITH GEOCODE', 
+                       'ZIP CODE', 'NEIGHBORHOOD', 'LATITUDE', 'LONGITUDE', 
+                       'CASE URL']
 
+    download = requests.get(kc_url)
+
+    # Continue if "success" response code
+    if download.status_code == 200:
+        decoded_dl = download.content.decode('utf-8')
+        req_reader = csv.reader(decoded_dl.splitlines(), delimiter = ',')
+        kc_reqs = list(req_reader)
+
+        kc_requests = pd.DataFrame(kc_reqs[1:], columns = kc_reqs[0])
+        kc_requests = kc_requests[kc_cols_to_keep]
+
+        return kc_requests
+
+
+def categorize(kc_requests):
     for col_name in ["REQUEST TYPE", "CATEGORY", "TYPE"]:
         kc_requests[col_name] = kc_requests[col_name].astype("category")
     kc_requests.dropna(subset=["CASE URL"], inplace = True)
     kc_requests['COMMENT_TEXT'] = pd.Series()
     kc_requests.set_index('CASE ID', inplace = True)
     return kc_requests
+
 
 def queue_kc_links(kc_link, kc_queue, visited_set):
     # get request object from case description link url
@@ -103,6 +110,8 @@ def kc_soup(clean_link, visited_set):
     else:
         print("Already vistied!")
 
+
+
 def pull_comments(case_soup, case_df):
     b_tag = case_soup.find('b', text=re.compile(r'Case ID:'))
     if b_tag:
@@ -116,6 +125,8 @@ def pull_comments(case_soup, case_df):
         if not re.match("^.*(dupe|duplicate|test).*$", comments):
             print("Adding comments")
             case_df["COMMENT_TEXT"].loc[case_num] = comments
+
+
 
 
 def convert_if_relative_url(current_url, new_url):
@@ -212,7 +223,7 @@ def is_url_ok_to_follow(url, limiting_domain):
 
 
 
-def go(kc_csv):
+def go(kc_url):
     '''
     Crawl Kansas City URLs and generate a pandas dataframe of service request
     details.
@@ -223,7 +234,8 @@ def go(kc_csv):
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
-    kc_df = import_kc(kc_csv)
+
+    kc_df = import_kc(kc_url)
 
     max_pages = kc_df.shape[0]
 
@@ -260,4 +272,4 @@ def go(kc_csv):
 
 
 if __name__ == "__main__":
-    go(kc_csv)
+    go(KC_URL)

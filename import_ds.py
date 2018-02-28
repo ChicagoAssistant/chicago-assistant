@@ -4,6 +4,7 @@ import io
 import pandas as pd
 import os
 
+
 def import_training_datasets(dataset_urls, req_cities, cols_to_keep):
     '''
     Retrieve a static dataset (ex: CSV) from a website.

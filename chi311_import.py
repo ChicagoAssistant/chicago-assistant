@@ -3,7 +3,9 @@
 import os
 from sodapy import Socrata
 from datetime import datetime, timedelta
+from dotenv import get_key, find_dotenv
 
+APP_TOKEN = get_key(find_dotenv(), 'SODAPY_APPTOKEN')
 
 
 
@@ -29,6 +31,10 @@ from datetime import datetime, timedelta
 # rows = self.cursor.fetchall()
 # row = rows[0][0]
 
+# SODAPY_APP_SECRET = dotenv.get('SODAPY_APP_SECRET')
+# SODAPY_APPTOKEN = dotenv.get('SODAPY_APPTOKEN')
+# DATABASE_PASSWORD = dotenv.get('DATABASE_PASSWORD')
+
 DOMAIN = 'https://data.cityofchicago.org'
 POTHOLES_ENDPOINT = '787j-mys9'
 RODENT_ENDPOINT = 'dvua-vftq'
@@ -38,18 +44,19 @@ STREETLIGHT_ENDPOINT = 'h555-t6kz'
 
 # create query
 def create_api_req(req_type, since_date):
-    app_token = os.environ['SODAPY_APPTOKEN']
-    client = Socrata(DOMAIN, app_token)
+    # app_token = os.environ['SODAPY_APPTOKEN']
+    client = Socrata(DOMAIN, APP_TOKEN)
     yesterday = datetime.today() - timedelta(days=1)
     df_list = []
+    offset_counter = 0
+    
     query = """
 limit
     20000
 where
     updated_at =
 """ + str(yesterday)
-    offset_counter = 0
-
+    
 
     if req_type == 'potholes':
         download_df = pd.DataFrame(cols = ['creation_date', 'status', 
@@ -175,6 +182,8 @@ def combine_requests(singles_df, deduped_df):
 def update_db(full_df):
     
     conn = psycopg2.connect("dbname=test user=civicchifecta")
+
+
     # conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     c = conn.cursor()
 

@@ -1,0 +1,3 @@
+# The following files should be excluded from git
+.env
+__pycache__
