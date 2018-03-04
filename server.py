@@ -221,8 +221,9 @@ def post(service_code, attribute, lat, lng, description,
              'api_key' : OPEN_311_APPTOKEN}
 
     response = requests.post(url, data= post_data)
-    print(response.text)
+    print('PRINT RESPONSE:', response.text)
     # token = response.json()[0]['token']
+    print('PRINT STATUS', response.status_code)
     status_code = response.status_code
 
     return status_code
