@@ -197,8 +197,11 @@ def followupEvent(event_key, data = ''):
               'address_correct':'address-correct'}
 
     event = events[event_key]
-    return {"followupEvent": {"name": '{}'.format(event),
+    event_full = {"followupEvent": {"name": '{}'.format(event),
                               "data": data}}
+
+    print(event_full)
+    return event_full
 
 def capture_response(req):
     pass
