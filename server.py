@@ -176,14 +176,14 @@ def post_request(req):
     if not address:
         address = parameters['address']
     lat, lng, formatted_address = geocode(address)
-    request_spec = parameters['request_spec']
+    request_spec = parameters['request-spec']
     attribute = generate_attribute[service_type][request_spec]
     description = parameters['description']
-    request_spec = parameters['request_spec']
+    request_spec = parameters['request-spec']
     address_string = formatted_address
     email = parameters['email']
-    first_name = parameters['first_name']
-    last_name = parameters['last_name']
+    first_name = parameters['first-name']
+    last_name = parameters['last-name']
     phone_number = parameters['phone-number']
 
     response = post(service_code, attribute, lat, lng, description,
