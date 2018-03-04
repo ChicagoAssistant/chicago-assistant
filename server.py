@@ -190,8 +190,6 @@ def post_request(req):
                address_string, email, first_name, last_name, phone)
 
 
-
-
 def post(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone):
     url = API_ENDPOINT + '/requests.json'
