@@ -60,10 +60,19 @@ def makeWebhookResult(req):
         #geocode address
         #create object to post to open311 servers
         #process the average number of days to complete request
-        token = post_request(req)
+        status_code = post_request(req)
+        status_message = generate_post_status_message(status_code)
         data = {"days": 5,
-                "token": token}
+                "post_status": status_message}
         return followupEvent('completion_time', data)
+
+
+def generate_post_status_message(status_code):
+    status_messages = {201: 'Your request has been submitted successfully!',
+                       400: 'Your request is a duplicate in our system!'}
+    status_message = status_messages[status_code]
+
+    return status_message
 
 
 def process_address(req):
@@ -212,8 +221,10 @@ def post(service_code, attribute, lat, lng, description,
              'api_key' : OPEN_311_APPTOKEN}
 
     response = requests.post(url, data= post_data)
+    token = response.json()[0]['token']
+    status_code = response.status_code
 
-    return response.text
+    return status_code
     
 def get_service_code(service_type):
     service_types = {'pothole': '4fd3b656e750846c53000004',
