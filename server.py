@@ -6,6 +6,7 @@ from flask import request
 from flask import make_response
 from flask import render_template
 import googlemaps
+import requests
 
 app = Flask(__name__)
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
