@@ -47,10 +47,11 @@ def get_action(req):
     # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
     try:
         action = req['result']['action']
+        return action
     except Exception:
         print('No action to grab from request.')
 
-    return action
+    
 
 def filter_city(city, gmaps_locs):
     '''
@@ -113,40 +114,40 @@ def get_address_recs(matched_addresses):
 
     return recommendations
 
-def makeWebhookResult(req):
-    '''
-    Takes a request from DialogFlow webhook and triages what the request
-    to produce the appropriate response.
-    Inputs:
-        - req (json): information passed from DialogFlow webhook
-    '''
-    action = get_action(req)
+# def makeWebhookResult(req):
+#     '''
+#     Takes a request from DialogFlow webhook and triages what the request
+#     to produce the appropriate response.
+#     Inputs:
+#         - req (json): information passed from DialogFlow webhook
+#     '''
+#     action = get_action(req)
 
-    if action == 'name':
-        return followupEvent('get_address')
+#     if action == 'name':
+#         return followupEvent('get_address')
 
-    if action == 'get.address':
-        return process_address(req)
+#     if action == 'get.address':
+#         return process_address(req)
 
-    if action == 'address.corrected':
-        service_type = get_service_type(req)
-        return followupEvent(service_type)
+#     if action == 'address.corrected':
+#         service_type = get_service_type(req)
+#         return followupEvent(service_type)
 
-    if action == 'reqeust.complete':
-        #geocode address
-        #create object to post to open311 servers
-        #process the average number of days to complete request
-        return followupEvent('completion_time',5)
+#     if action == 'reqeust.complete':
+#         #geocode address
+#         #create object to post to open311 servers
+#         #process the average number of days to complete request
+#         return followupEvent('completion_time',5)
         
        
 
 
     
-# def makeWebhookResult(req):
-#     if req['result']['action'] in ['name.collected','name.not.collected']:
-#         return {"followupEvent": {
-#                 "name": 'get-address'}
-#                    }
+def makeWebhookResult(req):
+    if req['result']['action'] in ['name.collected','name.not.collected']:
+        return {"followupEvent": {
+                "name": 'get-address'}
+                   }
 #     # elif req['result']['action'] == 'notification':
 #     elif req['result']['action'] == 'get.address':
 #         gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
