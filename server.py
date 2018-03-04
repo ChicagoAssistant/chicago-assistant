@@ -75,7 +75,7 @@ def get_service_type(req):
     Outputs:
         - service_type (string): service type of request
     '''
-    service_type = req['results']['parameters']['service-type']
+    service_type = req['result']['parameters']['service-type']
     return service_type
 
 def process_address(req):
