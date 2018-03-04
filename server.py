@@ -82,22 +82,22 @@ def get_service_type(req):
 def process_address(req):
     address = req['result']['parameters']['address']
     service_type = get_service_type(req)
-        if 'Chicago' not in address:
-            address += ' Chicago, IL'
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
 
-        if 'and' in address or '&' in address:
-            return followupEvent(service_type)
+    if 'and' in address or '&' in address:
+        return followupEvent(service_type)
 
-        matched_addresses = gmaps.places_autocomplete(address)
-        matched_addresses = filter_city('Chicago', matched_addresses)
+    matched_addresses = gmaps.places_autocomplete(address)
+    matched_addresses = filter_city('Chicago', matched_addresses)
 
-        if len(matched_addresses) == 0:
-            return followupEvent('get_address')
-        elif len(matched_addresses) == 1:
-            return followupEvent(service_type)
-        else:
-            address_recs = get_address_recs(matched_addresses)
-            return followupEvent('address_correct', address_recs)
+    if len(matched_addresses) == 0:
+        return followupEvent('get_address')
+    elif len(matched_addresses) == 1:
+        return followupEvent(service_type)
+    else:
+        address_recs = get_address_recs(matched_addresses)
+        return followupEvent('address_correct', address_recs)
 
 def get_address_recs(matched_addresses):
     '''
