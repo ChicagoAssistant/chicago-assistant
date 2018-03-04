@@ -34,7 +34,7 @@ def hello():
 @app.route('/test')
 def test():
     return render_template('page.html')
-    
+
 def get_action(req):
     '''
     Helper function to get action from request.
@@ -66,7 +66,7 @@ def filter_city(city, gmaps_locs):
     '''
     locations = [gmaps_loc for gmaps_loc in gmaps_locs 
                 if city in gmaps_loc['description']]
-   return locations
+    return locations
 
 def get_service_type(req):
     '''
