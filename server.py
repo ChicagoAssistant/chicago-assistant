@@ -46,10 +46,9 @@ def get_action(req):
     '''
     # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
     try:
-        action = req['result']['parameters']['action']
+        action = req['result']['action']
     except Exception:
         print('No action to grab from request.')
-
 
     return action
 
