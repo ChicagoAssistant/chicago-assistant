@@ -197,8 +197,8 @@ def followupEvent(event_key, data = ''):
               'address_correct':'address-correct'}
 
     event = events[event_key]
-    event_full = {"followupEvent": {"name": '{}'.format(event),
-                              "data": data}}
+    event_full = {"followupEvent": {"name": '{}'.format(event)}}
+                              # "data": data}}
 
     print(event_full)
     return event_full
