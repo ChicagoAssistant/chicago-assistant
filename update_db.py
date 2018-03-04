@@ -2,17 +2,24 @@ import psycopg2
 from dotenv import get_key, find_dotenv
 from sqlalchemy import create_engine
 import io
+import os
+
+
+SSL_DIR = os.path.dirname(__file__)
 
 USER = get_key(find_dotenv(), 'DB_USER')
 NAME = get_key(find_dotenv(), 'DB_NAME')
 PW = get_key(find_dotenv(), 'DB_PW')
 HOST = get_key(find_dotenv(), 'DB_HOST')
 PORT = get_key(find_dotenv(), 'DB_PORT')
+SSL = get_key(find_dotenv(), 'SSL')
 
+SSL_PATH = os.path.join(SSL_DIR, SSL)
 
 engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PORT, NAME)    
-engine = create_engine(engine_string)
-# dialect+driver://username:password@host:port/database
+ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
+engine = create_engine(engine_string, connect_args=ssl_args)
+# postgresql://civicchifecta:trif3cta@chi311.c1bdxz9lxp7b.us-east-2.rds.amazonaws.com:5432/chi311??sslrootcert=rds-combined-ca-bundle.pem&sslmode=require
 
 def create_db():
     connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}'".format(NAME, USER, HOST, PORT, PW)
@@ -199,6 +206,15 @@ ON CONFLICT(svc_req_number) DO UPDATE
            excluded.most_recent_action IS DISTINCT FROM most_recent_action)
           );
 '''
+
+
+# location query
+# user_input_lat = 41.885001
+# user_input_lon = -87.645939
+# pass_in = (user_input_lon, user_input_lat)
+# '$where=within_circle(location, 41.885001, -87.645939, 41.867011, -87.618516)'
+
+
 
 
 # CREATE OR REPLACE FUNCTION some_f(_tbl regclass, OUT result integer) AS

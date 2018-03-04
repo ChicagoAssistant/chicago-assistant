@@ -1,5 +1,3 @@
-# import psycopg2
-# import psycopg2.extensions
 import os
 from sodapy import Socrata
 from datetime import datetime, timedelta
@@ -10,13 +8,9 @@ import pandas as pd
 import math
 
 
-
 APP_TOKEN = get_key(find_dotenv(), 'SODAPY_APPTOKEN')
 
 DOMAIN = 'https://data.cityofchicago.org'
-# POTHOLES_ENDPOINT = '787j-mys9'
-# RODENT_ENDPOINT = 'dvua-vftq'
-# STREETLIGHT_ENDPOINT = 'h555-t6kz'
 
 
 historicals = [{'service_name':'potholes',
@@ -86,9 +80,6 @@ historicals = [{'service_name':'potholes',
                 'final_indicator': None,
                 'endpoint': 'h555-t6kz'}
                 ]
-
-
-
 
     #     # note for streetlight, location is a text field rather than point, so
     #     # within_circle cannot be used
@@ -180,15 +171,10 @@ def dedupe_df(df, service_dict):
                 keep_list.append(most_recent)
 
             elif final.shape[0] == 0:
-                print('error, final has no records for {}!!'.format(duplicate))
-                print(focus)
-                print()
-                print(final)
                 # if none of the duplicate entries are noted as final steps
                 # focus['completion_date'] = pd.to_datetime(x['completion_date'])
                 most_recent = focus['completion_date'].idxmax()
                 keep_list.append(most_recent)
-
 
     deduped_df = dupes.loc[keep_list]
     clean_df = df.append(deduped_df, ignore_index = True)
@@ -211,10 +197,10 @@ def check_updates(service_dict, days_back = 1):
    
     base_url = DOMAIN + "/resource/{}.json?$$app_token={}".format(service_dict['endpoint'], APP_TOKEN)
     test_url = base_url + "&$select=count(*)&$where=:updated_at>'{}'".format(period)
-    update_url = base_url + "&$where=:updated_at>'{}'$limit={}".format(period, limit)
+    update_url = base_url + "&$limit={}&$where=:updated_at>'{}'".format(limit, period)
     
     check_result = requests.get(test_url)
-    print(test_url)
+    print(test_url, "Code:", check_result.status_code)
     python_check = check_result.json()
     num_records = int(python_check[0]['count'])
     print(num_records)
@@ -223,32 +209,36 @@ def check_updates(service_dict, days_back = 1):
 
     new_updates = requests.get(update_url)
 
-    print(new_updates.status_code)
+    print(update_url, "Code:", new_updates.status_code)
     
-    # newly_updated = pd.DataFrame(new_updates.json())
-    # print(newly_updated[:5])
+    newly_updated = pd.DataFrame(new_updates.json())
+    print("pull #: 1")
+    print(newly_updated[:5])
     
-    # if pulls > 1:
-    #     update_list = [newly_updated]
-    #     for pull in range(pulls - 1):
-    #         print("pull #:", pull)
-    #         offset_url = base_url + "&$limit={}&$offset={}&$where=:updated_at>'{}'".format(limit, offset_amt, period)
-    #         offset_amt += 2000
-    #         print(offset_url)
-    # #         next_pull = requests.get(offset_url)
-    #         next_pull_df = pd.DataFrame(new_updates.json())
+    if pulls > 1:
+        
+        # perform HTTP GET request n - 1 more times and add to dataframe
+        update_list = [newly_updated]
+        for pull in range(pulls - 1):
+            print("pull #:", pull + 2)
+            offset_url = base_url + "&$limit={}&$offset={}&$where=:updated_at>'{}'".format(limit, offset_amt, period)
+            offset_amt += 2000
+           
+            next_pull = requests.get(offset_url)
+            print(offset_url, "Code:", next_pull.status_code)
+            next_pull_df = pd.DataFrame(next_pull.json())
 
-    #         update_list.append(next_pull_df)
+            update_list.append(next_pull_df)
 
             
-    #     newly_updated = pd.concat(update_list, ignore_index = True)
+        newly_updated = pd.concat(update_list, ignore_index = True)
     
-    # newly_updated.rename(columns = service_dict['clean_cols'], inplace=True)
-    # print(newly_updated[:5])
-    # newly_updated['creation_date'] = convert_dates(newly_updated['creation_date'])
-    # newly_updated['completion_date'] = convert_dates(newly_updated['completion_date'])
+    newly_updated.rename(columns = service_dict['clean_cols'], inplace=True)
+    print(newly_updated[:5])
+    newly_updated['creation_date'] = convert_dates(newly_updated['creation_date'])
+    newly_updated['completion_date'] = convert_dates(newly_updated['completion_date'])
 
-    # return newly_updated
+    return newly_updated
 
 
 
@@ -260,21 +250,13 @@ def daily_db_update(historicals_list):
         all_updates.append(updated)
     return all_updates
     
-    # SODA APIs are paged, and return a maximum of 50,000 per page. 
-    # to request subsequent pages, you’ll need to use the $limit and $offset
+      
 
-#     if len(rv) > 1000:
-#         
-
-#     # location query
-        
-
-
+    # location query
 #         user_input_lat = 41.885001
 #         user_input_lon = -87.645939
 #         pass_in = (user_input_lon, user_input_lat)
 #         '$where=within_circle(location, 41.885001, -87.645939, 41.867011, -87.618516)'
-#         # space = '+'
 
 
 
