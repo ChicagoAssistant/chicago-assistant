@@ -133,7 +133,7 @@ def makeWebhookResult(req):
         service_type = get_service_type(req)
         return followupEvent(service_type)
 
-    if action == 'reqeust.complete':
+    if action == 'request.complete':
         #geocode address
         #create object to post to open311 servers
         #process the average number of days to complete request
