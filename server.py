@@ -177,7 +177,7 @@ def post_request(req):
         address = parameters['address']
     lat, lng, formatted_address = geocode(address)
     request_spec = parameters['request-spec']
-    attribute = generate_attribute[service_type][request_spec]
+    attribute = generate_attribute(service_type,request_spec)
     description = parameters['description']
     request_spec = parameters['request-spec']
     address_string = formatted_address
