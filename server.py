@@ -123,7 +123,7 @@ def makeWebhookResult(req):
     '''
     action = get_action(req)
     print('****ACTION PRINT*****', action, '***************')
-    if action == 'name.collected':
+    if action == 'name':
         return followupEvent('get_address')
 
     if action == 'get.address':
@@ -137,7 +137,8 @@ def makeWebhookResult(req):
         #geocode address
         #create object to post to open311 servers
         #process the average number of days to complete request
-        return followupEvent('completion_time','5')
+        time = {"days":"5"}
+        return followupEvent('completion_time',time)
         
        
 
