@@ -231,7 +231,7 @@ def generate_attribute(service_type, request_spec):
     return attributes[service_type][request_spec]
 
 def geocode(address):
-    result = maps.geocode(address)[0]
+    result = gmaps.geocode(address)[0]
 
     lat = result['geometry']['location']['lat']
     lng = result['geometry']['location']['lng']
