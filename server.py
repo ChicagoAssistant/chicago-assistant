@@ -137,7 +137,7 @@ def makeWebhookResult(req):
         #geocode address
         #create object to post to open311 servers
         #process the average number of days to complete request
-        return followupEvent('completion_time',5)
+        return followupEvent('completion_time','5')
         
        
 
@@ -199,11 +199,9 @@ def followupEvent(event_key, data = None):
     event = events[event_key]
 
     if data:
-        return {"followupEvent": {"name": '{}'.format(event),
-                                  "data": data}}
+        return {"followupEvent": {"name": '{}'.format(event), "data": data}}
+
     return {"followupEvent": {"name": '{}'.format(event)}}
-                             
-    return event_full
 
 def capture_response(req):
     pass
