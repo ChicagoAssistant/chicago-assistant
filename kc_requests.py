@@ -13,38 +13,36 @@ def import_kc(kc_url):
     '''
     Create pandas data frame from list of Kansas City service requests
     '''
-    kc_cols_to_keep = ['CASE ID','SOURCE', 'REQUEST TYPE', 'CATEGORY', 'TYPE',
-                       'CREATION DATE', 'CREATION TIME', 'ADDRESS WITH GEOCODE', 
-                       'ZIP CODE', 'NEIGHBORHOOD', 'LATITUDE', 'LONGITUDE', 
-                       'CASE URL']
+    kc_cols_to_keep = ['CASE ID','REQUEST TYPE', 'CATEGORY', 'TYPE','CASE URL']
 
     download = requests.get(kc_url)
-
+    
     # Continue if "success" response code
     if download.status_code == 200:
         decoded_dl = download.content.decode('utf-8')
         req_reader = csv.reader(decoded_dl.splitlines(), delimiter = ',')
         kc_reqs = list(req_reader)
 
+        # create dataframe
         kc_requests = pd.DataFrame(kc_reqs[1:], columns = kc_reqs[0])
         kc_requests = kc_requests[kc_cols_to_keep]
+        
+        # format dataframe
+        for col_name in ["REQUEST TYPE", "CATEGORY", "TYPE"]:
+            kc_requests[col_name] = kc_requests[col_name].astype("category")
+       
+        # remove rows with no URLs to scrape for text descriptions
+        kc_requests.dropna(subset=["CASE URL"], inplace = True)
+        
+        # add blank column for comments to be scraped
+        kc_requests['COMMENT_TEXT'] = pd.Series()
+        kc_requests.set_index('CASE ID', inplace = True)
 
         return kc_requests
 
 
-def categorize(kc_requests):
-    for col_name in ["REQUEST TYPE", "CATEGORY", "TYPE"]:
-        kc_requests[col_name] = kc_requests[col_name].astype("category")
-    kc_requests.dropna(subset=["CASE URL"], inplace = True)
-    kc_requests['COMMENT_TEXT'] = pd.Series()
-    kc_requests.set_index('CASE ID', inplace = True)
-    return kc_requests
-
-
 def queue_kc_links(kc_link, kc_queue, visited_set):
     # get request object from case description link url
-    # print(urllib.parse.urlparse(kc_link).netloc)
-    print(kc_link)
     if (kc_link == ''):
         print("first error in queueing")
         kc_req = None
@@ -55,21 +53,17 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
     else:
         # check if link is an actual URL (no @s, emails) within correct domain
         limiting_domain = "webfusion.kcmo.org"
-        # print("set limiting domain")
         link_approval = is_url_ok_to_follow(kc_link, limiting_domain)
-        # print(link_approval)
 
         if link_approval:
             try:
                  kc_req = requests.get(kc_link)
-                 # print("tried:", kc_req.url)
                  if kc_req.status_code == 404 or kc_req.status_code == 403:
-                     print("404 error")
+                     print("404 error", c_req.status_code)
                      kc_req = None
-                # else:
-                #     print(kc_req.status_code)
+
             except Exception:
-                print("link_approval exception error")
+                print("link_approval exception error:", kc_req.status_code)
                 kc_req = None
         else:
             kc_req = None
@@ -86,7 +80,7 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
 
 
 def kc_soup(clean_link, visited_set):
-    # read request from case description link
+    # get read request from case URL description link
     if clean_link not in visited_set:
         clean_req = requests.get(clean_link)
 
@@ -95,6 +89,7 @@ def kc_soup(clean_link, visited_set):
                 soup_string = clean_req.text.encode('iso-8859-1')
                 visited_set.add(clean_req.url)
                 print("Made soup!")
+            
             except Exception:
                 print('read failed: ' + clean_req.url)
                 soup_string = ''
@@ -125,7 +120,6 @@ def pull_comments(case_soup, case_df):
         if not re.match("^.*(dupe|duplicate|test).*$", comments):
             print("Adding comments")
             case_df["COMMENT_TEXT"].loc[case_num] = comments
-
 
 
 
@@ -182,7 +176,7 @@ def is_url_ok_to_follow(url, limiting_domain):
     Outputs:
         Returns True if the protocol for the URL is HTTP, the domain
         is in the limiting domain, and the path is either a directory
-        or a file that has no extension or ends in .html. URLs
+        or a file that has no extension or ends in .html--URLs
         that include an "@" are not OK to follow.
     '''
     if "mailto:" in url:
@@ -206,8 +200,8 @@ def is_url_ok_to_follow(url, limiting_domain):
         print("fragment error")
         return False
 
-    # if parsed_url.query != "":
-    #     return False
+    if parsed_url.query == '':
+        return False
 
     loc = parsed_url.netloc
     ld = len(limiting_domain)
@@ -216,10 +210,9 @@ def is_url_ok_to_follow(url, limiting_domain):
         print("loc error")
         return False
 
-    # does it have the right extension
+    # check for correct extension
     (filename, ext) = os.path.splitext(parsed_url.path)
     return (ext == "" or ext == ".cfm")
-
 
 
 
@@ -234,7 +227,6 @@ def go(kc_url):
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
-
     kc_df = import_kc(kc_url)
 
     max_pages = kc_df.shape[0]

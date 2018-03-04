@@ -250,14 +250,6 @@ def daily_db_update(historicals_list):
         all_updates.append(updated)
     return all_updates
     
-      
-
-    # location query
-#         user_input_lat = 41.885001
-#         user_input_lon = -87.645939
-#         pass_in = (user_input_lon, user_input_lat)
-#         '$where=within_circle(location, 41.885001, -87.645939, 41.867011, -87.618516)'
-
 
 
 def go():
