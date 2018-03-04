@@ -50,7 +50,6 @@ def get_action(req):
     except Exception:
         print('No action to grab from request.')
 
-    action_type
 
     return action
 
