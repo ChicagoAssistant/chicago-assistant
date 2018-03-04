@@ -190,7 +190,7 @@ def makeWebhookResult(req):
 #         return None
 
 
-def followupEvent(event_key, data = {}):
+def followupEvent(event_key, data = None):
     events = {'pothole': 'pothole_request','rodent': 'rodent_request',
               'street light': 'street_light_request',
               'completion_time': 'completion_time', 
@@ -202,7 +202,7 @@ def followupEvent(event_key, data = {}):
     if data:
         return {"followupEvent": {"name": '{}'.format(event), "data": data}}
 
-    # return {"followupEvent": {"name": '{}'.format(event)}}
+    return {"followupEvent": {"name": '{}'.format(event)}}
 
 def capture_response(req):
     pass
