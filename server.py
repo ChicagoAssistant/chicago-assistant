@@ -8,8 +8,9 @@ from flask import render_template
 import googlemaps
 
 app = Flask(__name__)
-api_url = 'http://test311api.cityofchicago.org/open311/v2'
+API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
 GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
+OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
 gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
 
 @app.route('/webhook', methods=['POST'])
@@ -30,89 +31,10 @@ def webhook():
 def hello():
     return "Hello World!"
 
-
 @app.route('/test')
 def test():
     return render_template('page.html')
 
-def get_action(req):
-    '''
-    Helper function to get action from request.
-    Inputs:
-        - req (json): information passed from DialogFlow webhook
-    Outputs:
-        - action (string) action from DialogFlow which determines proceeding
-          action.
-    '''
-    # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
-    try:
-        action = req['result']['action']
-        return action
-    except Exception:
-        print('No action to grab from request.')
-
-    
-
-def filter_city(city, gmaps_locs):
-    '''
-    Filter out any locations that are not in the city of interest.
-    Inputs:
-        - city (string): name of the city of jurisdiction
-        - gmaps_locs (list of dicts): results returned from call to googlemaps
-             places_autocomplete method
-    Outputs:
-        - locations (list of dict(s)): filtered locations for city of interest
-    '''
-    locations = [gmaps_loc for gmaps_loc in gmaps_locs 
-                if city in gmaps_loc['description']]
-    return locations
-
-def get_service_type(req):
-    '''
-    Given a DialogFlow json, get the service type of the request.
-    Inputs:
-        - req (json): information passed from DialogFlow webhook
-    Outputs:
-        - service_type (string): service type of request
-    '''
-    service_type = req['result']['parameters']['service-type']
-    return service_type
-
-def process_address(req):
-    address = req['result']['parameters']['address']
-    service_type = get_service_type(req)
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
-
-    if 'and' in address or '&' in address:
-        return followupEvent(service_type)
-
-    matched_addresses = gmaps.places_autocomplete(address)
-    matched_addresses = filter_city('Chicago', matched_addresses)
-
-    if len(matched_addresses) == 0:
-        return followupEvent('get_address')
-    elif len(matched_addresses) == 1:
-        return followupEvent(service_type)
-    else:
-        address_recs = get_address_recs(matched_addresses)
-        return followupEvent('address_correct', address_recs)
-
-def get_address_recs(matched_addresses):
-    '''
-    In the case of multiple address matches, this function will
-    return up to the top three address recommendations
-    '''
-    address_recs = ['','','']
-    for num, matched_addresses in enumerate(matched_addresses[:3]):
-        address = matched_addresses['structured_formatting']['main_text']
-        address_recs[num] = address
-
-    recommendations = {"address1" : address_recs[0],
-                       "address2" : address_recs[1],
-                       "address3" : address_recs[2]}
-
-    return recommendations
 
 def makeWebhookResult(req):
     '''
@@ -137,60 +59,40 @@ def makeWebhookResult(req):
         #geocode address
         #create object to post to open311 servers
         #process the average number of days to complete request
-        time = {"days":"5"}
-        return followupEvent('completion_time',time)
-        
-       
+        token = post_request(req)
+        data = {"days": 5,
+                "token": token}
+        return followupEvent('completion_time', data)
 
 
-    
-# def makeWebhookResult(req):
-#     if req['result']['action'] in ['name.collected','name.not.collected']:
-#         return {"followupEvent": {
-#                 "name": 'get-address'}
-#                    }
-#     # elif req['result']['action'] == 'notification':
-#     elif req['result']['action'] == 'get.address':
-#         gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
-#         address = req['result']['parameters']['address']
-#         if 'and' in address or '&' in address:
-#             key = req['result']['parameters']['service-type']
-#             return followupEvent(key)
-#         if 'Chicago' not in address:
-#             address += ' Chicago, IL'
-#         results = gmaps.places_autocomplete(address)
-#         if len(results) == 0:
-#             return {"followupEvent": {
-#                 "name": 'get-address'}
-#                    }
-#         elif len(results) == 1:
-#             key = req['result']['parameters']['service-type']
-#             return followupEvent(key)
-#         else:
-#             addresses = ['','','']
-#             for num, result in enumerate(results[:3]):
-#                 address = result['structured_formatting']['main_text']
-#                 addresses[num] = address
-#             return {"followupEvent": {
-#                 "name": "address-correct",
-#                 "data": {"address1" : addresses[0],
-#                          "address2" : addresses[1],
-#                          "address3" : addresses[2]}}
-#                    }
-#     elif req['result']['action'] == 'request.complete':
-#         return {"followupEvent": {
-#                 "name": 'completion_time',
-#                 "data": {
-#                 "days":"5"}}
-#                 }
-#     elif req['result']['action'] == 'address.corrected':
-#         key = req['result']['parameters']['service-type']
-#         return followupEvent(key)
-#     else:
-#         return None
+def process_address(req):
+    '''
+    Enter description.
+    '''
+    address = req['result']['parameters']['address']
+    service_type = get_service_type(req)
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
+
+    if 'and' in address or '&' in address:
+        return followupEvent(service_type)
+
+    matched_addresses = gmaps.places_autocomplete(address)
+    matched_addresses = filter_city('Chicago', matched_addresses)
+
+    if len(matched_addresses) == 0:
+        return followupEvent('get_address')
+    elif len(matched_addresses) == 1:
+        return followupEvent(service_type)
+    else:
+        address_recs = get_address_recs(matched_addresses)
+        return followupEvent('address_correct', address_recs)
 
 
 def followupEvent(event_key, data = None):
+    '''
+    Enter description.
+    '''
     events = {'pothole': 'pothole_request','rodent': 'rodent_request',
               'street light': 'street_light_request',
               'completion_time': 'completion_time', 
@@ -204,14 +106,143 @@ def followupEvent(event_key, data = None):
 
     return {"followupEvent": {"name": '{}'.format(event)}}
 
-def capture_response(req):
-    pass
+
+def filter_city(city, gmaps_locs):
+    '''
+    Filter out any locations that are not in the city of interest.
+    Inputs:
+        - city (string): name of the city of jurisdiction
+        - gmaps_locs (list of dicts): results returned from call to googlemaps
+             places_autocomplete method
+    Outputs:
+        - locations (list of dict(s)): filtered locations for city of interest
+    '''
+    locations = [gmaps_loc for gmaps_loc in gmaps_locs 
+                if city in gmaps_loc['description']]
+    return locations
+
+
+def get_action(req):
+    '''
+    Helper function to get action from request.
+    Inputs:
+        - req (json): information passed from DialogFlow webhook
+    Outputs:
+        - action (string) action from DialogFlow which determines proceeding
+          action.
+    '''
+    # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
+    try:
+        action = req['result']['action']
+        return action
+    except Exception:
+        print('No action to grab from request.')
+
+
+def get_service_type(req):
+    '''
+    Given a DialogFlow json, get the service type of the request.
+    Inputs:
+        - req (json): information passed from DialogFlow webhook
+    Outputs:
+        - service_type (string): service type of request
+    '''
+    service_type = req['result']['parameters']['service-type']
+    return service_type
+
+
+def get_address_recs(matched_addresses):
+    '''
+    In the case of multiple address matches, this function will
+    return up to the top three address recommendations
+    '''
+    address_recs = ['','','']
+    for num, matched_addresses in enumerate(matched_addresses[:3]):
+        address = matched_addresses['structured_formatting']['main_text']
+        address_recs[num] = address
+
+    recommendations = {"address1" : address_recs[0],
+                       "address2" : address_recs[1],
+                       "address3" : address_recs[2]}
+
+    return recommendations
+
+
+def post_request(req):
+    parameters = req['result']['parameters']
+    service_type = get_service_type(req)
+    service_code = get_service_code(service_type)
+    address = parameters['corrected-address']
+    if not address:
+        address = parameters['address']
+    lat, lng, formatted_address = geocode(address)
+    request_spec = parameters['request_spec']
+    attribute = generate_attribute[service_type][request_spec]
+    description = parameters['description']
+    request_spec = parameters['request_spec']
+    address_string = formatted_address
+    email = parameters['email']
+    first_name = parameters['first_name']
+    last_name = parameters['last_name']
+    phone_number = parameters['phone-number']
+
+    response = post(service_code, attribute, lat, lng, description,
+               address_string, email, first_name, last_name, phone)
+
+
+
+
+def post(service_code, attribute, lat, lng, description,
+                 address_string, email, first_name, last_name, phone):
+    url = API_ENDPOINT + '/requests.json'
+
+    post_data = {'service_code' : service_code,
+             'attribute' : attribute,
+             'lat' : lat,
+             'long' : lng,
+             'first_name' : first_name,
+             'last_name' : last_name,
+             'email': email,
+             'phone_number' : phone,
+             'description': description,
+             'api_key' : OPEN_311_APPTOKEN}
+
+   response = requests.post(url, data=post_data)
+
+   return response.text
+    
+def get_service_code(service_type):
+    service_types = {'pothole': '4fd3b656e750846c53000004',
+                     'rodent': '4fd3b9bce750846c5300004a',
+                     'street light': '4ffa9f2d6018277d400000c8'}
+
+    return service_types[service_type]
+
+def generate_attribute(service_type, request_spec):
+    attributes = {'pothole': {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
+                              'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
+                              'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
+                              'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
+                              'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
+                  'rodent':  {'yes': {'DOUYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
+                              'no':  {'DOUYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
+                  'street light': {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
+                                   'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+    return attributes[service_type][request_spec]
+
+def geocode(address):
+    result = maps.geocode(address)[0]
+
+    lat = result['geometry']['location']['lat']
+    lng = result['geometry']['location']['lng']
+    formatted_address = result['formatted_address']
+
+    return lat, lng, formatted_address
+
+
+
 if __name__ == '__main__':
 	app.run(debug=True)
-
-
-
-
 
 
 # {
