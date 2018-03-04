@@ -123,7 +123,7 @@ def makeWebhookResult(req):
     '''
     action = get_action(req)
 
-    if action = 'name':
+    if action == 'name':
         return followupEvent('get_address')
 
     if action == 'get.address':
