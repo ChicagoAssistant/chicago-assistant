@@ -201,8 +201,10 @@ def post_request(req):
     last_name = parameters['last-name']
     
 
-    response = post(service_code, attribute, lat, lng, description,
+    status_code = post(service_code, attribute, lat, lng, description,
                address_string, email, first_name, last_name, phone)
+
+    return status_code
 
 
 def post(service_code, attribute, lat, lng, description,
