@@ -59,7 +59,6 @@ def makeWebhookResult(req):
     if action == 'request.complete':
         #process the average number of days to complete request
         status_message = post_request(req)
-        status_message = generate_post_status_message(status_code)
         data = {"days": 5,
                 "post_status": status_message}
         return followupEvent('completion_time', data)
