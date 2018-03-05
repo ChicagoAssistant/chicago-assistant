@@ -199,7 +199,7 @@ def post_request(req):
     first_name = parameters['first-name']
     last_name = parameters['last-name']
 
-    post_data = sturcture_post_data(service_code, attribute, lat, lng, description,
+    post_data = structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone)
 
     print(post_data)
