@@ -57,10 +57,8 @@ def makeWebhookResult(req):
         return followupEvent(service_type)
 
     if action == 'request.complete':
-        #geocode address
-        #create object to post to open311 servers
         #process the average number of days to complete request
-        status_code = post_request(req)
+        status_message = post_request(req)
         status_message = generate_post_status_message(status_code)
         data = {"days": 5,
                 "post_status": status_message}
@@ -70,9 +68,8 @@ def makeWebhookResult(req):
 def generate_post_status_message(status_code):
     status_messages = {201: 'Your request has been submitted successfully!',
                        400: 'Your request is a duplicate in our system!'}
-    status_message = status_messages[status_code]
-
-    return status_message
+ 
+    return status_messages[status_code]
 
 
 def process_address(req):
@@ -179,6 +176,8 @@ def get_address_recs(matched_addresses):
 
 
 def post_request(req):
+    url = API_ENDPOINT + '/requests.json'
+
     parameters = req['result']['parameters']
     service_type = get_service_type(req)
     service_code = get_service_code(service_type)
@@ -199,17 +198,22 @@ def post_request(req):
         phone = ''
     first_name = parameters['first-name']
     last_name = parameters['last-name']
-    
 
-    status_code = post(service_code, attribute, lat, lng, description,
-               address_string, email, first_name, last_name, phone)
+    post_data = sturcture_post_data(service_code, attribute, lat, lng, description,
+                 address_string, email, first_name, last_name, phone)
 
-    return status_code
+    print(post_data)
+    response = requests.post(url, data= post_data)
+    token = response.json()[0]['token']
+    status_code = response.status_code
+    status_message = generate_post_status_message(status_code)
+
+    return status_message
 
 
-def post(service_code, attribute, lat, lng, description,
+
+def structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone):
-    url = API_ENDPOINT + '/requests.json'
 
     post_data = {'service_code' : service_code,
              'attribute' : attribute,
@@ -222,13 +226,7 @@ def post(service_code, attribute, lat, lng, description,
              'description': description,
              'api_key' : OPEN_311_APPTOKEN}
 
-    response = requests.post(url, data= post_data)
-    print('PRINT RESPONSE:', response.text)
-    # token = response.json()[0]['token']
-    print('PRINT STATUS', response.status_code)
-    status_code = response.status_code
-
-    return status_code
+    return post_data
     
 def get_service_code(service_type):
     service_types = {'pothole': '4fd3b656e750846c53000004',
@@ -243,8 +241,8 @@ def generate_attribute(service_type, request_spec):
                               'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
                               'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
                               'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
-                  'rodent':  {'yes': {'DOUYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
-                              'no':  {'DOUYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
+                  'rodent':  {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
+                              'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
                   'street light': {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
                                    'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
     return attributes[service_type][request_spec]
