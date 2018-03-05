@@ -77,12 +77,12 @@ def process_address(req):
     '''
     address = req['result']['parameters']['address']
     service_type = get_service_type(req)
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
 
     if 'and' in address or '&' in address:
         return followupEvent(service_type)
 
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
     matched_addresses = gmaps.places_autocomplete(address)
     matched_addresses = filter_city('Chicago', matched_addresses)
 
@@ -164,7 +164,7 @@ def get_address_recs(matched_addresses):
     '''
     address_recs = ['','','']
     for num, matched_addresses in enumerate(matched_addresses[:3]):
-        address = matched_addresses['structured_formatting']['main_text']
+        address = matched_addresses['description']
         address_recs[num] = address
 
     recommendations = {"address1" : address_recs[0],
@@ -183,6 +183,8 @@ def post_request(req):
     address = parameters['corrected-address']
     if not address:
         address = parameters['address']
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
     lat, lng, formatted_address = geocode(address)
     request_spec = parameters['request-spec']
     attribute = generate_attribute(service_type,request_spec)
