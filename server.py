@@ -201,8 +201,9 @@ def post_request(req):
     post_data = structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone)
 
-    print(post_data)
+    print('OPEN_311_POST_REQUEST:', post_data)
     response = requests.post(url, data= post_data)
+    print('OPEN_311_RESPONSE:', response)
     token = response.json()[0]['token']
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
