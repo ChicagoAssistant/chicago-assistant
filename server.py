@@ -16,6 +16,9 @@ gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    '''
+    Recieves and responds to DialogFlow webhook post requests.
+    '''
     req = request.get_json(silent = True, force = True)
     print('Request:\n', json.dumps(req, indent=4))
     with open('data.json', 'w') as f:
@@ -64,16 +67,22 @@ def makeWebhookResult(req):
         return followupEvent('completion_time', data)
 
 
-def generate_post_status_message(status_code):
-    status_messages = {201: 'Your request has been submitted successfully!',
-                       400: 'Your request is a duplicate in our system!'}
- 
-    return status_messages[status_code]
-
-
 def process_address(req):
     '''
-    Enter description.
+    Manages collection of viable address. If an adequate address is given 
+    (i.e. a single match is found via google maps autocomplete), then 
+    the conversation continues. If there aren't any matches, then the
+    conversation will direct the user to enter the address again. In the case
+    that there is more than one match, this function will pass back up to
+    three address recommended matches for the user to select from.
+
+    Inputs:
+        - req (dict) data from DialogFlow where the address given by the
+            user is stored
+    Outputs:
+        - followupEvent action: depending on the quality of the address
+            provided by the user, this funciton will steer the conversation
+            to the end of obtaining an adequate address
     '''
     address = req['result']['parameters']['address']
     service_type = get_service_type(req)
@@ -94,12 +103,75 @@ def process_address(req):
         address_recs = get_address_recs(matched_addresses)
         return followupEvent('address_correct', address_recs)
 
+def post_request(req):
+    '''
+    Extracts all required data from DialogFlow post request containing
+    all user inputs, structures the data into a dictionary which can
+    then be passed as a post request to the Chicago Open311 environment.
+    
+    Inputs:
+        - req (json): information passed from DialogFlow webhook containing
+            user inputs
+    Outputs:
+        - status_message (string): status message indicating whether
+            the post request submitted successfully or failed
+    '''
+    url = API_ENDPOINT + '/requests.json'
+
+    parameters = req['result']['parameters']
+    service_type = get_service_type(req)
+    service_code = get_service_code(service_type)
+    address = parameters['corrected-address']
+    if not address:
+        address = parameters['address']
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
+    lat, lng, formatted_address = geocode(address)
+    request_spec = parameters['request-spec']
+    attribute = generate_attribute(service_type,request_spec)
+    description = parameters['description']
+    request_spec = parameters['request-spec']
+    address_string = formatted_address
+    try:
+        email = parameters['email']
+        phone = parameters['phone-number']
+    except:
+        email = ''
+        phone = ''
+    first_name = parameters['first-name']
+    last_name = parameters['last-name']
+
+    post_data = structure_post_data(service_code, attribute, lat, lng, description,
+                 address_string, email, first_name, last_name, phone)
+
+    print('OPEN_311_POST_REQUEST:', post_data)
+    response = requests.post(url, data= post_data)
+    print('OPEN_311_RESPONSE:', response)
+    token = response.json()[0]['token']
+    status_code = response.status_code
+    status_message = generate_post_status_message(status_code)
+
+    return status_message
 
 def followupEvent(event_key, data = None):
     '''
-    Enter description.
+    Helper function that returns the webhook response needed
+    based on where the conversation needs to go next. The 'events'
+    below specify one of any events that are triggered in the
+    conversation. This function simply constructs the appropriate
+    event response for DialogFlow.
+
+    Inputs:
+        - event_key (string): event key that will be used to map
+            to the appropriate event name recognized by DialogFlow
+        - data (dict): data that is passed along to DialogFlow as
+            parameters to be passed back to the messaging interface
+    Outputs:
+        - followupEvent (dict): dict formatted in necessary format
+            for DialogFlow to trigger the next event in conversation
     '''
-    events = {'pothole': 'pothole_request','rodent': 'rodent_request',
+    events = {'pothole': 'pothole_request',
+              'rodent': 'rodent_request',
               'street light': 'street_light_request',
               'completion_time': 'completion_time', 
               'get_address': 'get-address',
@@ -159,8 +231,15 @@ def get_service_type(req):
 
 def get_address_recs(matched_addresses):
     '''
-    In the case of multiple address matches, this function will
-    return up to the top three address recommendations
+    Helper function, in the case of multiple address matches, this function will
+    return up to the top three address recommendations.
+    Inputs:
+        - matched_addresses (dict): address match results from google maps
+            places autocomplete
+    Outputs:
+        - recommendations (dict): three addresses in a dictionary in the
+            required format to be passed back to DialogFlow as data in a 
+            followupEvent dictionary.
     '''
     address_recs = ['','','']
     for num, matched_addresses in enumerate(matched_addresses[:3]):
@@ -174,49 +253,38 @@ def get_address_recs(matched_addresses):
     return recommendations
 
 
-def post_request(req):
-    url = API_ENDPOINT + '/requests.json'
+def get_service_code(service_type):
+    '''
+    Helper function to get the service code given a string.
+    Inputs:
+        - service_type (string): service type generated in DialogueFlow
+            based on user input
+    Outputs:
+        - service_code (string): Open311 service code for service request
+    '''
+    service_types = {'pothole': '4fd3b656e750846c53000004',
+                     'rodent': '4fd3b9bce750846c5300004a',
+                     'street light': '4ffa9f2d6018277d400000c8'}
 
-    parameters = req['result']['parameters']
-    service_type = get_service_type(req)
-    service_code = get_service_code(service_type)
-    address = parameters['corrected-address']
-    if not address:
-        address = parameters['address']
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
-    lat, lng, formatted_address = geocode(address)
-    request_spec = parameters['request-spec']
-    attribute = generate_attribute(service_type,request_spec)
-    description = parameters['description']
-    request_spec = parameters['request-spec']
-    address_string = formatted_address
-    try:
-        email = parameters['email']
-        phone = parameters['phone-number']
-    except:
-        email = ''
-        phone = ''
-    first_name = parameters['first-name']
-    last_name = parameters['last-name']
+    return service_types[service_type]
 
-    post_data = structure_post_data(service_code, attribute, lat, lng, description,
-                 address_string, email, first_name, last_name, phone)
 
-    print('OPEN_311_POST_REQUEST:', post_data)
-    response = requests.post(url, data= post_data)
-    print('OPEN_311_RESPONSE:', response)
-    token = response.json()[0]['token']
-    status_code = response.status_code
-    status_message = generate_post_status_message(status_code)
-
-    return status_message
-
+def generate_post_status_message(status_code):
+    '''
+    Helper function to return status message given a status code.
+    '''
+    status_messages = {201: 'Your request has been submitted successfully!',
+                       400: 'Your request is a duplicate in our system!'}
+ 
+    return status_messages[status_code]
 
 
 def structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone):
-
+    '''
+    Helper function to structure all user inputs into appropriate 
+    dictionary format that will be passed to Open311 systems.
+    '''
     post_data = {'service_code' : service_code,
              'attribute' : attribute,
              'lat' : lat,
@@ -230,27 +298,42 @@ def structure_post_data(service_code, attribute, lat, lng, description,
              'api_key' : OPEN_311_APPTOKEN}
 
     return post_data
-    
-def get_service_code(service_type):
-    service_types = {'pothole': '4fd3b656e750846c53000004',
-                     'rodent': '4fd3b9bce750846c5300004a',
-                     'street light': '4ffa9f2d6018277d400000c8'}
 
-    return service_types[service_type]
 
 def generate_attribute(service_type, request_spec):
-    attributes = {'pothole': {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
-                              'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
-                              'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
-                              'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
-                              'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
-                  'rodent':  {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
-                              'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
-                  'street light': {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
-                                   'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+    '''
+    Helper function to create dictionary needed for the Open311 post request.
+    '''
+    attributes = {
+    'pothole': 
+    {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
+     'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
+     'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
+     'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
+     'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
+    'rodent':  
+    {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
+     'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
+    'street light': 
+    {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
+     'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+
     return attributes[service_type][request_spec]
 
+
 def geocode(address):
+    '''
+    Function that will geocode an address and return lat, long, and
+    a formatted address. Google Maps used for geocoding.
+
+    Inputs:
+        - address (string): address of service request given by user
+    Outputs:
+        - lat (float): latitude of address as given by google maps
+        - lng (float): longitude of address as given by google maps
+        - formatted_address (string): full address of location as given
+            by google maps
+    '''
     result = gmaps.geocode(address)[0]
 
     lat = result['geometry']['location']['lat']
@@ -260,26 +343,5 @@ def geocode(address):
     return lat, lng, formatted_address
 
 
-
 if __name__ == '__main__':
 	app.run(debug=True)
-
-
-# {
-#         "jurisdiction_id": jurisdiction_id,
-#         "service_code": service_code,
-#         "attribute": attribute,
-#         "description": description,
-#         "lat": lat,
-#         "long": long_,
-#         "address_string": address_string,
-#         "address_id": address_id,
-#         "email": email,
-#         "device_id": device_id,
-#         "accont_id": account_id,
-#         "first_name": first_name,
-#         "last_name": last_name,
-#         "phone": phone,
-#         "description": description,
-#         "media_url": media_url
-#     }
