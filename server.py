@@ -222,6 +222,7 @@ def structure_post_data(service_code, attribute, lat, lng, description,
              'first_name' : first_name,
              'last_name' : last_name,
              'email': email,
+             'address_string': address_string,
              'phone_number' : phone,
              'description': description,
              'api_key' : OPEN_311_APPTOKEN}
