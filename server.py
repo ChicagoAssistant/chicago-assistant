@@ -13,7 +13,7 @@ API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
 GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
 OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
 gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
-DATABSE_URL = os.environ['DATABSE_URL']
+DATABSE_URL = os.environ['DATABASE_URL']
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
