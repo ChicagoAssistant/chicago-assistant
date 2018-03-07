@@ -1,7 +1,8 @@
 import urllib
 import json
 import os
-import psycopg2
+import psycopg2 
+from psycopg2 import sql
 from flask import Flask
 from flask import request
 from flask import make_response
@@ -449,7 +450,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
     
 
     # fill table parameters in query for initial query
-    both_q = psycopg2.sql.SQL(time_loc_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
+    both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
     conn2 = psycopg2.connect(connection_string)
@@ -464,7 +465,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         loc_only = True
         
         # check database for average resolution time in neighborhood regardless of time
-        loc_q = psycopg2.sql.SQL(loc_only_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
+        loc_q = sql.SQL(loc_only_neighborhood).format(tbl=sql.Identifier(tablename))
         cur.execute(loc_q, [input_longitude, input_latitude])
         res = cur.fetchone()
         print(res)
@@ -472,7 +473,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         if res and all(v is None for v in res):
             loc_only = False
             # check database for average resolution time at time of year regardless of neighborhood
-            time_q = psycopg2sql.SQL(time_only).format(tbl=psycopg2.sql.Identifier(tablename))
+            time_q = psycopg2sql.SQL(time_only).format(tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
             print(res)
