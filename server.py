@@ -157,7 +157,6 @@ def post_request(req):
     attribute = generate_attribute(service_type,request_spec)
     description = parameters['description']
     request_spec = parameters['request-spec']
-    address_string = formatted_address
     try:
         email = parameters['email']
         phone = parameters['phone-number']
@@ -166,7 +165,7 @@ def post_request(req):
         phone = ''
     first_name = parameters['first-name']
     last_name = parameters['last-name']
-    lat, lng, formatted_address = return_address_params(req)
+    lat, lng, address_string = return_address_params(req)
     post_data = structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone)
 
