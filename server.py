@@ -1,10 +1,12 @@
 import urllib
 import json
 import os
-import psycopg2
+import psycopg2 
+from psycopg2 import sql
 from flask import Flask
 from flask import request
 from flask import make_response
+import random
 from flask import render_template
 # from psycopg2 import sql
 import googlemaps
@@ -75,9 +77,10 @@ def makeWebhookResult(req):
 
     if action == 'request.complete':
         #process the average number of days to complete request
+        service_type = get_service_type(req)
         status_message = post_request(req)
         lat, lng, formatted_address = return_address_params(req)
-        table = get_tablename(service_types)
+        table = get_tablename(service_type)
         completion_message = request_triggerd_query(table, lat, lng)
         
         data = {"completion_time": completion_message,
@@ -154,7 +157,7 @@ def post_request(req):
     service_code = get_service_code(service_type)
 
     request_spec = parameters['request-spec']
-    attribute = generate_attribute(service_type,request_spec)
+    attribute = generate_attribute(service_type, request_spec)
     description = parameters['description']
     request_spec = parameters['request-spec']
     try:
@@ -171,12 +174,15 @@ def post_request(req):
 
     print('OPEN_311_POST_REQUEST:', post_data)
     response = requests.post(url, data= post_data)
-    print('OPEN_311_RESPONSE:', response)
-    token = response.json()[0]['token']
+    print('OPEN_311_RESPONSE:', response.text)
+    try:
+        token = response.json()[0]['token']
+    except:
+        token = ''
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
 
-    write_to_db(req, token, service_type, attribute, lat, lng, description,
+    write_to_db(req, token, service_type, request_spec, lat, lng, description,
                  address_string, status_code, email, first_name, last_name, phone)
 
     return status_message
@@ -343,8 +349,8 @@ def generate_attribute(service_type, request_spec):
     {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
      'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
     'street light': 
-    {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
-     'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+    {'completely out': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
+     'on and off': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
 
     return attributes[service_type][request_spec]
 
@@ -371,13 +377,13 @@ def geocode(address):
     return lat, lng, formatted_address
 
 
-def get_tablename(key):
+def get_tablename(db_key):
 
     db_map = {'pothole': 'potholes','rodent': 'rodents', 
               'street light': 'streetlights', 
               'dialogflow': 'dialogflow_transactions'}
 
-    return db_map[service_types]
+    return db_map[db_key]
 
 
 def request_triggerd_query(tablename, input_latitude, input_longitude):
@@ -444,7 +450,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
     
 
     # fill table parameters in query for initial query
-    both_q = psycopg2.sql.SQL(time_loc_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
+    both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
     conn2 = psycopg2.connect(connection_string)
@@ -459,7 +465,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         loc_only = True
         
         # check database for average resolution time in neighborhood regardless of time
-        loc_q = psycopg2.sql.SQL(loc_only_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
+        loc_q = sql.SQL(loc_only_neighborhood).format(tbl=sql.Identifier(tablename))
         cur.execute(loc_q, [input_longitude, input_latitude])
         res = cur.fetchone()
         print(res)
@@ -467,7 +473,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         if res and all(v is None for v in res):
             loc_only = False
             # check database for average resolution time at time of year regardless of neighborhood
-            time_q = psycopg2sql.SQL(time_only).format(tbl=psycopg2.sql.Identifier(tablename))
+            time_q = sql.SQL(time_only).format(tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
             print(res)
@@ -504,17 +510,18 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         return completion_message
 
 
-def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description, 
+
+def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
-    key = list(attribute_spec)[0]
-    detail_string = attribute_spec[key]
-    detail_string = detail_string.replace("'", "\"")
-    converted = json.loads(detail_string)
-    request_details = converted['key']
+    # key = list(attribute_spec)[0]
+    # detail_string = attribute_spec[key]
+    # detail_string = detail_string.replace("'", "\"")
+    # converted = json.loads(detail_string)
+    # request_details = converted['key']
 
-    session_Id = req['sessionId']
+    session_Id = req['sessionId'][:-4] + str(random.randint(1000,9999))
     request_time = req['timestamp']
     req_status = req['status']['code']
 
@@ -525,11 +532,11 @@ def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description
     VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
 
-    with psycopg2.connect(psycopg2_string) as conn2:
+    with psycopg2.connect(connection_string) as conn2:
         with conn2.cursor() as cur:
 
             cur.execute(end_transaction_query, (session_Id, request_time, 
-            service_type, description, request_details, address_string, lat, lng, email, 
+            service_type, description, request_spec, address_string, lat, lng, email, 
             first_name, last_name, phone, post_status, token))
 
             conn2.commit()
