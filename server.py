@@ -1,10 +1,12 @@
 import urllib
 import json
 import os
+import psycopg2
 from flask import Flask
 from flask import request
 from flask import make_response
 from flask import render_template
+# from psycopg2 import sql
 import googlemaps
 import requests
 
@@ -15,10 +17,15 @@ OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
 gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
 
 
-DATABASE_URL = os.environ['DATABASE_URL']
+USER = os.environ['DB_USER']
+NAME = os.environ['DB_NAME']
+PW = os.environ['DB_PW']
+HOST = os.environ['DB_HOST']
+PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
+SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-psycopg2_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
+connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
 @app.route('/webhook', methods=['POST'])
@@ -70,19 +77,11 @@ def makeWebhookResult(req):
         #process the average number of days to complete request
         status_message = post_request(req)
         lat, lng, formatted_address = return_address_params(req)
-        response_time = request_triggerd_query(service_type, lat, lng)
-            if response_time:
-                if response_time[0]:
-                    data = {"months": response_time[0],
-                            "post_status": status_message}
-                elif response_time[1]:
-                    data = {"weeks": response_time[1],
-                            "post_status": status_message}
-                else:
-                    data = {"days": response_time[2],
-                            "post_status": status_message}
-            else:
-                return followupEvent('no_completion_time')
+        table = get_tablebame(service_types)
+        response_time = request_triggerd_query(table, lat, lng)
+        
+        data = {"completion_time": completion_message,
+                "post_status": status_message}
                      
         return followupEvent('completion_time', data)
 
@@ -177,6 +176,9 @@ def post_request(req):
     token = response.json()[0]['token']
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
+
+    write_to_db(req, token, service_type, attribute, lat, lng, description,
+                 address_string, status_code, email, first_name, last_name, phone)
 
     return status_message
 
@@ -369,141 +371,166 @@ def geocode(address):
 
     return lat, lng, formatted_address
 
+
+def get_tablebame(key):
+
+    db_map = {'pothole': 'potholes','rodent': 'rodents', 
+              'street light': 'streetlights', 
+              'dialogflow': 'dialogflow_transactions'}
+
+    return db_map[service_types]
+
+
 def request_triggerd_query(tablename, input_latitude, input_longitude):
     time_only ='''
-SELECT 
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
+SELECT
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months,
 CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
 THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
 END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days
 FROM {} a
-JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
+INNER JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
       FROM {} a 
       WHERE age(now(), creation_date) < '4 years' 
       AND status IN ('Completed', 'Completed - Dup')
       AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2) ) AS recent
-ON recent.service_request_number = a.service_request_number;
-'''
+ON recent.service_request_number = a.service_request_number;'''
 
     
     loc_only_neighborhood = '''
-SELECT 
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
+SELECT
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months,
 CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
 THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
 END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months
+SELECT b.pri_neigh as neighborhood,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
 FROM {tbl} a
 INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
 WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
 WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
 AND status IN ('Completed', 'Completed - Dup')
 AND age(now(), creation_date) < '2 years' 
-'''
-
-    loc_only_radius = '''
-SELECT 
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months
-FROM streetlights 
-JOIN (SELECT service_request_number, EXTRACT(WEEK FROM streetlights.creation_date) as week_nunm
-      FROM streetlights
-      WHERE age(now(), creation_date) < '2 years' 
-      AND status IN ('Completed', 'Completed - Dup')
-      AND earth_box( ll_to_earth(%s , %s), 1000) @> ll_to_earth(streetlights.latitude, streetlights.longitude)) AS recent
-ON recent.service_request_number = streetlights.service_request_number;
-    '''
-
-    time_loc_radius = '''
-SELECT 
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months
-FROM {} a 
-JOIN (SELECT service_request_number, EXTRACT(WEEK FROM streetlights.creation_date) as week_nunm
-      FROM streetlights
-      WHERE age(now(), creation_date) < '4 years' 
-      AND status IN ('Completed', 'Completed - Dup')
-      AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) 
-      AND (EXTRACT(WEEK FROM now()) + 2) 
-      AND earth_box( ll_to_earth([lat], [lon]), 1000) @> ll_to_earth(a.latitude, streetlights.longitude)) AS recent
-ON recent.service_request_number = streetlights.service_request_number;
-    '''
+GROUP BY b.pri_neigh;'''
 
 
     time_loc_neighborhood = '''
-SELECT 
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
+SELECT b.pri_neigh as neighborhood,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months,
 CASE WHEN EXTRACT(DAY FROM AVG(response_time)) >= 14
 THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
 END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days
 FROM {tbl} a
 INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
 WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
 WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
 AND age(now(), creation_date) < '4 years' 
 AND status IN ('Completed', 'Completed - Dup')
-AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2);
-'''
+AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2)
+GROUP BY b.pri_neigh;'''
     
-    both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
-    loc_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
-    time_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
-   
 
-    conn2 = psycopg2.connect(psycopg2_connection_string)
+    # fill table parameters in query for initial query
+    both_q = psycopg2.sql.SQL(time_loc_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
+    loc_only = False
+
+    conn2 = psycopg2.connect(connection_string)
     cur = conn2.cursor()
     cur.execute(both_q, [input_longitude, input_latitude])
     res = cur.fetchone()
     print(res)
 
-    if all(v is None for v in res):
-        print("checking time only")
+    unit_index = {0: 'months', 1: 'weeks', 2: 'days'}
+
+    if res and all(v is None for v in res):
+        loc_only = True
+        
+        # check database for average resolution time in neighborhood regardless of time
+        loc_q = psycopg2.sql.SQL(loc_only_neighborhood).format(tbl=psycopg2.sql.Identifier(tablename))
         cur.execute(loc_q, [input_longitude, input_latitude])
         res = cur.fetchone()
         print(res)
 
-        if all(v is None for v in res):
-            print("checking time ony")
-            cur.execute(time_q, [input_longitude, input_latitude])
+        if res and all(v is None for v in res):
+            loc_only = False
+            # check database for average resolution time at time of year regardless of neighborhood
+            time_q = psycopg2sql.SQL(time_only).format(tbl=psycopg2.sql.Identifier(tablename))
+            cur.execute(time_q)
             res = cur.fetchone()
             print(res)
-
-            if all(v is None for v in res):
-                return "I'm sorry, we can't find the average resolution time for {} requests this time of year in your area."
 
     cur.close()
     conn2.close()
 
-    return res
-    
+ 
+    if res and len(res) == 3: 
+        for i, num in enumerate(res):
+            if num:
+                num = int(num)
+                unit = unit_index[i]
+                completion_message = "Thanks! 311 requests for {} are typically serviced within {} {} at this time of year.".format(tablename, num, unit)
+                return completion_message
+                print(res)
+
+    if res and len(res) == 4:
+        neighb = res[0]
+        for i, num in enumerate(res[1:]):
+            if num:
+                num = int(num)
+                unit = unit_index[i]
+                if loc_only:
+                    completion_message = "Thanks! 311 requests for {} in the {} area are typically serviced within {} {}.".format(tablename, neighb, num, unit)
+
+                else:
+                    completion_message = "Thanks! 311 requests for {} in the {} area are typically serviced within {} {} at this time of year.".format(tablename, neighb, num, unit)
+
+                return completion_message
+
+    if not res:
+        completion_message = "Thank you for your 311 {} request! If you provided your contact information, we'll let you know when the city marks it complete.".format(tablename)
+        return completion_message
+
+
+
+
+
+def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description, 
+                address_string, post_status, email = None, first_name = None, 
+                last_name = None, phone = None):
+
+    session_Id = req['sessionId']
+    request_time = req['timestamp']
+    req_status = req['status']['errorType']
+
+    end_transaction_query ='''
+    INSERT INTO dialogflow_transactions (session_Id, req_status, request_time, 
+    service_type, description, request_details, address_string, lat, lng, email, 
+    first_name, last_name, phone, open_311_status, token)
+    VALUES (%s %s  %s %s %s %s %s %s %s %s %s %s %s %s %s);'''
+
+    with psycopg2.connect(connection_string) as conn2:
+        with conn2.cursor() as cur:
+            cur.execute(end_transaction_query, [session_Id, req_status, request_time, 
+            service_type, description, attribute_spec, address_string, lat, lng, email, 
+            first_name, last_name, phone, open_311_status, token])
+
+            conn2.commit()
+
+
 
 if __name__ == '__main__':
 	app.run(debug=True)
