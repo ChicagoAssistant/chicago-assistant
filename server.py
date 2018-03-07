@@ -505,28 +505,33 @@ GROUP BY b.pri_neigh;'''
         return completion_message
 
 
-
-
-
 def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description, 
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
+    key = list(attribute_spec)[0]
+    detail_string = attribute_spec[key]
+    detail_string = detail_string.replace("'", "\"")
+    converted = json.loads(detail_string)
+    request_details = converted['key']
+
     session_Id = req['sessionId']
     request_time = req['timestamp']
-    req_status = req['status']['errorType']
+    req_status = req['status']['code']
 
     end_transaction_query ='''
-    INSERT INTO dialogflow_transactions (session_Id, req_status, request_time, 
+    INSERT INTO dialogflow_transactions (session_Id, request_time, 
     service_type, description, request_details, address_string, lat, lng, email, 
     first_name, last_name, phone, open_311_status, token)
-    VALUES (%s %s  %s %s %s %s %s %s %s %s %s %s %s %s %s);'''
+    VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    '''
 
-    with psycopg2.connect(connection_string) as conn2:
+    with psycopg2.connect(psycopg2_string) as conn2:
         with conn2.cursor() as cur:
-            cur.execute(end_transaction_query, [session_Id, req_status, request_time, 
-            service_type, description, attribute_spec, address_string, lat, lng, email, 
-            first_name, last_name, phone, open_311_status, token])
+
+            cur.execute(end_transaction_query, (session_Id, request_time, 
+            service_type, description, request_details, address_string, lat, lng, email, 
+            first_name, last_name, phone, post_status, token))
 
             conn2.commit()
 
