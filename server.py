@@ -171,7 +171,7 @@ def post_request(req):
 
     print('OPEN_311_POST_REQUEST:', post_data)
     response = requests.post(url, data= post_data)
-    print('OPEN_311_RESPONSE:', response)
+    print('OPEN_311_RESPONSE:', response.text)
     print('SSL:', SSL)
     print('SSL_PATH',SSL_PATH)
     print('SSL_DIR', SSL_DIR)
@@ -508,7 +508,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
 
 
 
-def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description,
+def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
@@ -533,7 +533,7 @@ def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description
         with conn2.cursor() as cur:
 
             cur.execute(end_transaction_query, (session_Id, request_time, 
-            service_type, description, request_details, address_string, lat, lng, email, 
+            service_type, description, request_spec, address_string, lat, lng, email, 
             first_name, last_name, phone, post_status, token))
 
             conn2.commit()
