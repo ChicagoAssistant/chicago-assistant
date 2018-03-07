@@ -77,7 +77,7 @@ def makeWebhookResult(req):
         #process the average number of days to complete request
         status_message = post_request(req)
         lat, lng, formatted_address = return_address_params(req)
-        table = get_tablename(service_types)
+        table = get_tablename(service_type)
         completion_message = request_triggerd_query(table, lat, lng)
         
         data = {"completion_time": completion_message,
@@ -374,13 +374,13 @@ def geocode(address):
     return lat, lng, formatted_address
 
 
-def get_tablename(key):
+def get_tablename(db_key):
 
     db_map = {'pothole': 'potholes','rodent': 'rodents', 
               'street light': 'streetlights', 
               'dialogflow': 'dialogflow_transactions'}
 
-    return db_map[service_types]
+    return db_map[db_key]
 
 
 def request_triggerd_query(tablename, input_latitude, input_longitude):
