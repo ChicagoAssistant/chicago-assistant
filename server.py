@@ -172,6 +172,9 @@ def post_request(req):
     print('OPEN_311_POST_REQUEST:', post_data)
     response = requests.post(url, data= post_data)
     print('OPEN_311_RESPONSE:', response)
+    print('SSL:', SSL)
+    print('SSL_PATH',SSL_PATH)
+    print('SSL_DIR', SSL_DIR)
     token = response.json()[0]['token']
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
