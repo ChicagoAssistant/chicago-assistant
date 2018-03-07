@@ -72,7 +72,7 @@ def makeWebhookResult(req):
         return process_address(req)
 
     if action == 'address.corrected':
-        return process_address
+        return process_address(req)
         # service_type = get_service_type(req)
         # return followupEvent(service_type)
 
