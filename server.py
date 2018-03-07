@@ -5,6 +5,7 @@ import psycopg2
 from flask import Flask
 from flask import request
 from flask import make_response
+import random
 from flask import render_template
 # from psycopg2 import sql
 import googlemaps
@@ -519,7 +520,7 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
     # converted = json.loads(detail_string)
     # request_details = converted['key']
 
-    session_Id = req['sessionId']
+    session_Id = req['sessionId'][:-4] + str(random.randint(1000,9999))
     request_time = req['timestamp']
     req_status = req['status']['code']
 
