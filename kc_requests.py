@@ -62,8 +62,8 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
                      print("404 error", c_req.status_code)
                      kc_req = None
 
-            except Exception:
-                print("link_approval exception error:", kc_req.status_code)
+            except Exception as e:
+                print("link_approval exception error:", e)
                 kc_req = None
         else:
             kc_req = None
@@ -75,7 +75,7 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
             clean_link, frag = urllib.parse.urldefrag(abs_url)
 
             if clean_link not in visited_set:
-                print("New clean link:", clean_link)
+                # print("New clean link:", clean_link)
                 kc_queue.put(clean_link)
 
 
@@ -88,7 +88,7 @@ def kc_soup(clean_link, visited_set):
             try:
                 soup_string = clean_req.text.encode('iso-8859-1')
                 visited_set.add(clean_req.url)
-                print("Made soup!")
+                # print("Made soup!")
             
             except Exception:
                 print('read failed: ' + clean_req.url)
@@ -113,14 +113,11 @@ def pull_comments(case_soup, case_df):
         case_num = int(b_tag.next_sibling)
 
     desc = case_soup.find('rc_descrlong')
-    print("got comments!")
     if desc:
         comments = desc.text
 
         if not re.match("^.*(dupe|duplicate|test).*$", comments):
-            print("Adding comments")
             case_df["COMMENT_TEXT"].loc[case_num] = comments
-
 
 
 def convert_if_relative_url(current_url, new_url):
@@ -216,6 +213,9 @@ def is_url_ok_to_follow(url, limiting_domain):
 
 
 
+
+
+
 def go(kc_url):
     '''
     Crawl Kansas City URLs and generate a pandas dataframe of service request
@@ -227,8 +227,7 @@ def go(kc_url):
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
-    kc_df = import_kc(kc_url)
-
+    kc_df = import_kc(KC_URL)
     max_pages = kc_df.shape[0]
 
     # initialize queue to hold links to scrape
@@ -243,25 +242,32 @@ def go(kc_url):
     for link in kc_df["CASE URL"]:
         queue_kc_links(link, kc_queue, visited_set)
 
-    print("Is queue empty?", kc_queue.empty())
-
     while not kc_queue.empty() and (pages_visited <= max_pages):
-        print("Entering while loop")
         case_url = kc_queue.get()
-        print("To make soup:", case_url)
         case_soup = kc_soup(case_url, visited_set)
 
         if case_soup:
             # if soup was created (URL was ok to follow), add one to page
             # counter and add comments on page to case dataframe
             pages_visited += 1
-            print("To pull comments:", case_url)
             pull_comments(case_soup, kc_df)
 
-    print("Crawler visited {} pages".format(pages_visited))
+    kc_df.dropna(axis = 0, how = 'any', subset = ["COMMENT_TEXT"], inplace = True)
+    kc_df = kc_df[kc_df["COMMENT_TEXT"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
+    kc_df. =kc_df[["REQUEST TYPE", "COMMENT_TEXT"]]
 
-    return kc_df["COMMENT_TEXT"].count()
+    return kc_df
 
+
+def chicago_df(chi_csv):
+    chi = pd.read_excel(chi_csv, sheet_name=0) 
+    chi2 = pd.read_excel(chi_csv, sheet_name=1)
+    chi = chi.append(chi2)
+    chi = chi[chi["Comments"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
+    chi = chi[['SR Type Description', 'Comments']]
+
+    return chi
 
 if __name__ == "__main__":
     go(KC_URL)
+    chicago_df('Open311SRs.xls')
