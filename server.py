@@ -72,8 +72,9 @@ def makeWebhookResult(req):
         return process_address(req)
 
     if action == 'address.corrected':
-        service_type = get_service_type(req)
-        return followupEvent(service_type)
+        return process_address
+        # service_type = get_service_type(req)
+        # return followupEvent(service_type)
 
     if action == 'request.complete':
         #process the average number of days to complete request
@@ -349,8 +350,8 @@ def generate_attribute(service_type, request_spec):
     {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
      'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
     'street light': 
-    {'on and off': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
-     'completely out': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+    {'completely out': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
+     'on and off': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
 
     return attributes[service_type][request_spec]
 
