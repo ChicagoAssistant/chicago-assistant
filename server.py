@@ -473,7 +473,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         if res and all(v is None for v in res):
             loc_only = False
             # check database for average resolution time at time of year regardless of neighborhood
-            time_q = psycopg2sql.SQL(time_only).format(tbl=sql.Identifier(tablename))
+            time_q = sql.SQL(time_only).format(tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
             print(res)
