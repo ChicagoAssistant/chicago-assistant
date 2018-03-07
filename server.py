@@ -75,6 +75,7 @@ def makeWebhookResult(req):
 
     if action == 'request.complete':
         #process the average number of days to complete request
+        service_type = get_service_type
         status_message = post_request(req)
         lat, lng, formatted_address = return_address_params(req)
         table = get_tablename(service_type)
