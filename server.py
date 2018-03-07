@@ -154,7 +154,7 @@ def post_request(req):
     service_code = get_service_code(service_type)
 
     request_spec = parameters['request-spec']
-    attribute = generate_attribute(service_type,request_spec)
+    attribute = generate_attribute(service_type, request_spec)
     description = parameters['description']
     request_spec = parameters['request-spec']
     try:
@@ -176,7 +176,7 @@ def post_request(req):
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
 
-    write_to_db(req, token, service_type, attribute, lat, lng, description,
+    write_to_db(req, token, service_type, request_spec, lat, lng, description,
                  address_string, status_code, email, first_name, last_name, phone)
 
     return status_message
@@ -509,11 +509,11 @@ def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
-    key = list(attribute_spec)[0]
-    detail_string = attribute_spec[key]
-    detail_string = detail_string.replace("'", "\"")
-    converted = json.loads(detail_string)
-    request_details = converted['key']
+    # key = list(attribute_spec)[0]
+    # detail_string = attribute_spec[key]
+    # detail_string = detail_string.replace("'", "\"")
+    # converted = json.loads(detail_string)
+    # request_details = converted['key']
 
     session_Id = req['sessionId']
     request_time = req['timestamp']
