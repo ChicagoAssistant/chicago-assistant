@@ -526,7 +526,7 @@ def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description
     VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
 
-    with psycopg2.connect(psycopg2_string) as conn2:
+    with psycopg2.connect(connection_string) as conn2:
         with conn2.cursor() as cur:
 
             cur.execute(end_transaction_query, (session_Id, request_time, 
