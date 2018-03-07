@@ -4,3 +4,4 @@ __pycache__
 historic_chicago_data_upload
 .ipynb_checkpoints/
 rds-ca-2015-us-east-2.pem
+neighborhoods.sql
