@@ -505,7 +505,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         return completion_message
 
 
-def  testing(req, token, service_type, attribute_spec, lat, lng, description, 
+def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description, 
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
@@ -520,17 +520,18 @@ def  testing(req, token, service_type, attribute_spec, lat, lng, description,
     req_status = req['status']['code']
 
     end_transaction_query ='''
-    INSERT INTO dialogflow_transactions (session_Id, req_status, request_time, 
+    INSERT INTO dialogflow_transactions (session_Id, request_time, 
     service_type, description, request_details, address_string, lat, lng, email, 
     first_name, last_name, phone, open_311_status, token)
-    VALUES (%(id)s, %(sendcode)s,  %(time)s, %(type)s, %(desc)s, %(dets)s, %(addy)s, %s, %s, %s, %s, %s, %s, %s, %s);
+    VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
-    with psycopg2.connect(connection_string) as conn2:
+
+    with psycopg2.connect(psycopg2_string) as conn2:
         with conn2.cursor() as cur:
 
-            cur.execute(end_transaction_query, (session_Id, req_status, request_time, 
+            cur.execute(end_transaction_query, (session_Id, request_time, 
             service_type, description, request_details, address_string, lat, lng, email, 
-            first_name, last_name, phone, int(post_status), token))
+            first_name, last_name, phone, post_status, token))
 
             conn2.commit()
 
