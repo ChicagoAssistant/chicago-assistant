@@ -504,7 +504,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         return completion_message
 
 
-def  testing(req, token, service_type, attribute_spec, lat, lng, description, 
+def testing(req, token, service_type, attribute_spec, lat, lng, description, 
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
