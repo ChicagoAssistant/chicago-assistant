@@ -13,7 +13,13 @@ API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
 GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
 OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
 gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
-DATABSE_URL = os.environ['DATABASE_URL']
+
+
+DATABASE_URL = os.environ['DATABASE_URL']
+SSL_DIR = os.path.dirname(__file__)
+SSL_PATH = os.path.join(SSL_DIR, SSL)
+psycopg2_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
+
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -63,8 +69,21 @@ def makeWebhookResult(req):
     if action == 'request.complete':
         #process the average number of days to complete request
         status_message = post_request(req)
-        data = {"days": 5,
-                "post_status": status_message}
+        lat, lng, formatted_address = return_address_params(req)
+        response_time = request_triggerd_query(service_type, lat, lng)
+            if response_time:
+                if response_time[0]:
+                    data = {"months": response_time[0],
+                            "post_status": status_message}
+                elif response_time[1]:
+                    data = {"weeks": response_time[1],
+                            "post_status": status_message}
+                else:
+                    data = {"days": response_time[2],
+                            "post_status": status_message}
+            else:
+                return followupEvent('no_completion_time')
+                     
         return followupEvent('completion_time', data)
 
 
@@ -104,6 +123,18 @@ def process_address(req):
         address_recs = get_address_recs(matched_addresses)
         return followupEvent('address_correct', address_recs)
 
+
+def return_address_params(req):
+    parameters = req['result']['parameters']
+    address = parameters['corrected-address']
+    if not address:
+        address = parameters['address']
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
+    clean_geos = geocode(address)
+    return clean_geos
+
+
 def post_request(req):
     '''
     Extracts all required data from DialogFlow post request containing
@@ -122,12 +153,7 @@ def post_request(req):
     parameters = req['result']['parameters']
     service_type = get_service_type(req)
     service_code = get_service_code(service_type)
-    address = parameters['corrected-address']
-    if not address:
-        address = parameters['address']
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
-    lat, lng, formatted_address = geocode(address)
+
     request_spec = parameters['request-spec']
     attribute = generate_attribute(service_type,request_spec)
     description = parameters['description']
@@ -141,7 +167,7 @@ def post_request(req):
         phone = ''
     first_name = parameters['first-name']
     last_name = parameters['last-name']
-
+    lat, lng, formatted_address = return_address_params(req)
     post_data = structure_post_data(service_code, attribute, lat, lng, description,
                  address_string, email, first_name, last_name, phone)
 
@@ -343,6 +369,141 @@ def geocode(address):
 
     return lat, lng, formatted_address
 
+def request_triggerd_query(tablename, input_latitude, input_longitude):
+    time_only ='''
+SELECT 
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+END as weeks,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months
+FROM {} a
+JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
+      FROM {} a 
+      WHERE age(now(), creation_date) < '4 years' 
+      AND status IN ('Completed', 'Completed - Dup')
+      AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2) ) AS recent
+ON recent.service_request_number = a.service_request_number;
+'''
+
+    
+    loc_only_neighborhood = '''
+SELECT 
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+END as weeks,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months
+FROM {tbl} a
+INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
+WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
+WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
+AND status IN ('Completed', 'Completed - Dup')
+AND age(now(), creation_date) < '2 years' 
+'''
+
+    loc_only_radius = '''
+SELECT 
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+END as weeks,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months
+FROM streetlights 
+JOIN (SELECT service_request_number, EXTRACT(WEEK FROM streetlights.creation_date) as week_nunm
+      FROM streetlights
+      WHERE age(now(), creation_date) < '2 years' 
+      AND status IN ('Completed', 'Completed - Dup')
+      AND earth_box( ll_to_earth(%s , %s), 1000) @> ll_to_earth(streetlights.latitude, streetlights.longitude)) AS recent
+ON recent.service_request_number = streetlights.service_request_number;
+    '''
+
+    time_loc_radius = '''
+SELECT 
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+END as weeks,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months
+FROM {} a 
+JOIN (SELECT service_request_number, EXTRACT(WEEK FROM streetlights.creation_date) as week_nunm
+      FROM streetlights
+      WHERE age(now(), creation_date) < '4 years' 
+      AND status IN ('Completed', 'Completed - Dup')
+      AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) 
+      AND (EXTRACT(WEEK FROM now()) + 2) 
+      AND earth_box( ll_to_earth([lat], [lon]), 1000) @> ll_to_earth(a.latitude, streetlights.longitude)) AS recent
+ON recent.service_request_number = streetlights.service_request_number;
+    '''
+
+
+    time_loc_neighborhood = '''
+SELECT 
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+END as days,
+CASE WHEN EXTRACT(DAY FROM AVG(response_time)) >= 14
+THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+END as weeks,
+CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+THEN justify_days(AVG("response_time"))
+END as months
+FROM {tbl} a
+INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
+WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
+WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
+AND age(now(), creation_date) < '4 years' 
+AND status IN ('Completed', 'Completed - Dup')
+AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2);
+'''
+    
+    both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
+    loc_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
+    time_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
+   
+
+    conn2 = psycopg2.connect(psycopg2_connection_string)
+    cur = conn2.cursor()
+    cur.execute(both_q, [input_longitude, input_latitude])
+    res = cur.fetchone()
+    print(res)
+
+    if all(v is None for v in res):
+        print("checking time only")
+        cur.execute(loc_q, [input_longitude, input_latitude])
+        res = cur.fetchone()
+        print(res)
+
+        if all(v is None for v in res):
+            print("checking time ony")
+            cur.execute(time_q, [input_longitude, input_latitude])
+            res = cur.fetchone()
+            print(res)
+
+            if all(v is None for v in res):
+                return "I'm sorry, we can't find the average resolution time for {} requests this time of year in your area."
+
+    cur.close()
+    conn2.close()
+
+    return res
+    
 
 if __name__ == '__main__':
 	app.run(debug=True)
