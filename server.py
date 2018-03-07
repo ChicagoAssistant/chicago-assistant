@@ -77,8 +77,8 @@ def makeWebhookResult(req):
         #process the average number of days to complete request
         status_message = post_request(req)
         lat, lng, formatted_address = return_address_params(req)
-        table = get_tablebame(service_types)
-        response_time = request_triggerd_query(table, lat, lng)
+        table = get_tablename(service_types)
+        completion_message = request_triggerd_query(table, lat, lng)
         
         data = {"completion_time": completion_message,
                 "post_status": status_message}
@@ -372,7 +372,7 @@ def geocode(address):
     return lat, lng, formatted_address
 
 
-def get_tablebame(key):
+def get_tablename(key):
 
     db_map = {'pothole': 'potholes','rodent': 'rodents', 
               'street light': 'streetlights', 
@@ -383,65 +383,65 @@ def get_tablebame(key):
 
 def request_triggerd_query(tablename, input_latitude, input_longitude):
     time_only ='''
-SELECT
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days
-FROM {} a
-INNER JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
+    SELECT
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+    THEN justify_days(AVG("response_time"))
+    END as months,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+    END as weeks,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+    END as days
+    FROM {} a
+    INNER JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
       FROM {} a 
       WHERE age(now(), creation_date) < '4 years' 
       AND status IN ('Completed', 'Completed - Dup')
       AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2) ) AS recent
-ON recent.service_request_number = a.service_request_number;'''
+    ON recent.service_request_number = a.service_request_number;'''
 
     
     loc_only_neighborhood = '''
-SELECT
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-END as weeks,
-SELECT b.pri_neigh as neighborhood,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days,
-FROM {tbl} a
-INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
-WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
-WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
-AND status IN ('Completed', 'Completed - Dup')
-AND age(now(), creation_date) < '2 years' 
-GROUP BY b.pri_neigh;'''
+    SELECT
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+    THEN justify_days(AVG("response_time"))
+    END as months,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
+    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+    END as weeks,
+    SELECT b.pri_neigh as neighborhood,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+    END as days,
+    FROM {tbl} a
+    INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
+    WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
+    WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
+    AND status IN ('Completed', 'Completed - Dup')
+    AND age(now(), creation_date) < '2 years' 
+    GROUP BY b.pri_neigh;'''
 
 
     time_loc_neighborhood = '''
-SELECT b.pri_neigh as neighborhood,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-THEN justify_days(AVG("response_time"))
-END as months,
-CASE WHEN EXTRACT(DAY FROM AVG(response_time)) >= 14
-THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-END as weeks,
-CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-END as days
-FROM {tbl} a
-INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
-WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
-WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
-AND age(now(), creation_date) < '4 years' 
-AND status IN ('Completed', 'Completed - Dup')
-AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2)
-GROUP BY b.pri_neigh;'''
+    SELECT b.pri_neigh as neighborhood,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
+    THEN justify_days(AVG("response_time"))
+    END as months,
+    CASE WHEN EXTRACT(DAY FROM AVG(response_time)) >= 14
+    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
+    END as weeks,
+    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
+    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
+    END as days
+    FROM {tbl} a
+    INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
+    WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
+    WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
+    AND age(now(), creation_date) < '4 years' 
+    AND status IN ('Completed', 'Completed - Dup')
+    AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2)
+    GROUP BY b.pri_neigh;'''
     
 
     # fill table parameters in query for initial query
@@ -505,7 +505,7 @@ GROUP BY b.pri_neigh;'''
         return completion_message
 
 
-def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description, 
+def  testing(req, token, service_type, attribute_spec, lat, lng, description, 
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
@@ -520,18 +520,17 @@ def  write_to_db(req, token, service_type, attribute_spec, lat, lng, description
     req_status = req['status']['code']
 
     end_transaction_query ='''
-    INSERT INTO dialogflow_transactions (session_Id, request_time, 
+    INSERT INTO dialogflow_transactions (session_Id, req_status, request_time, 
     service_type, description, request_details, address_string, lat, lng, email, 
     first_name, last_name, phone, open_311_status, token)
-    VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    VALUES (%(id)s, %(sendcode)s,  %(time)s, %(type)s, %(desc)s, %(dets)s, %(addy)s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
-
-    with psycopg2.connect(psycopg2_string) as conn2:
+    with psycopg2.connect(connection_string) as conn2:
         with conn2.cursor() as cur:
 
-            cur.execute(end_transaction_query, (session_Id, request_time, 
+            cur.execute(end_transaction_query, (session_Id, req_status, request_time, 
             service_type, description, request_details, address_string, lat, lng, email, 
-            first_name, last_name, phone, post_status, token))
+            first_name, last_name, phone, int(post_status), token))
 
             conn2.commit()
 
