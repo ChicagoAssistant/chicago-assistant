@@ -370,12 +370,16 @@ ON CONFLICT(service_request_number) DO UPDATE
 def daily_db_update(historicals_list, days_back = 1): 
     # add error flag, maybe trigger email?
     all_updates = []
-    for service_dict in historicals_list:
-        print("starting {}...".format(service_dict['service_name']))
-        updated = check_updates(service_dict, days_back)
-        clean_updates = dedupe_df(updated, service_dict)
-        update_table(clean_updates, service_dict['service_name'])
-    return "completed without error"
+    try:
+        for service_dict in historicals_list:
+            print("starting {}...".format(service_dict['service_name']))
+            updated = check_updates(service_dict, days_back)
+            clean_updates = dedupe_df(updated, service_dict)
+            update_table(clean_updates, service_dict['service_name'])
+        return "completed without error"
+    except Exception as e:
+        print("Update failed: {}".format(e))
+
     
 
  
