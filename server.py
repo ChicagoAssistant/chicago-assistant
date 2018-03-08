@@ -72,15 +72,16 @@ def makeWebhookResult(req):
         return process_address(req)
 
     if action == 'address.corrected':
-        service_type = get_service_type(req)
-        return followupEvent(service_type)
+        return process_address(req, True)
+        # service_type = get_service_type(req)
+        # return followupEvent(service_type)
 
     if action == 'request.complete':
         #process the average number of days to complete request
-        service_type = get_service_type(req)
         status_message = post_request(req)
-        lat, lng, formatted_address = return_address_params(req)
+        service_type = get_service_type(req)
         table = get_tablename(service_type)
+        lat, lng, formatted_address = return_address_params(req)
         completion_message = request_triggerd_query(table, lat, lng)
         
         data = {"completion_time": completion_message,
@@ -89,7 +90,7 @@ def makeWebhookResult(req):
         return followupEvent('completion_time', data)
 
 
-def process_address(req):
+def process_address(req, corrected = False):
     '''
     Manages collection of viable address. If an adequate address is given 
     (i.e. a single match is found via google maps autocomplete), then 
@@ -106,7 +107,10 @@ def process_address(req):
             provided by the user, this funciton will steer the conversation
             to the end of obtaining an adequate address
     '''
-    address = req['result']['parameters']['address']
+    if corrected:
+        address = req['result']['parameters']['corrected-address']
+    else:
+        address = req['result']['parameters']['address']
     service_type = get_service_type(req)
 
     if 'and' in address or '&' in address:
@@ -515,11 +519,6 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
                 address_string, post_status, email = None, first_name = None, 
                 last_name = None, phone = None):
 
-    # key = list(attribute_spec)[0]
-    # detail_string = attribute_spec[key]
-    # detail_string = detail_string.replace("'", "\"")
-    # converted = json.loads(detail_string)
-    # request_details = converted['key']
 
     session_Id = req['sessionId'][:-4] + str(random.randint(1000,9999))
     request_time = req['timestamp']
@@ -540,7 +539,6 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
             first_name, last_name, phone, post_status, token))
 
             conn2.commit()
-
 
 
 if __name__ == '__main__':
