@@ -6,21 +6,20 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from dotenv import get_key, find_dotenv
 import os
 
-
-USER = get_key(find_dotenv(), 'DB_USER')
-NAME = get_key(find_dotenv(), 'DB_NAME')
-PW = get_key(find_dotenv(), 'DB_PW')
-HOST = get_key(find_dotenv(), 'DB_HOST')
-PORT = get_key(find_dotenv(), 'DB_PORT')
-SSL = get_key(find_dotenv(), 'SSL')
+USER = os.environ['DB_USER']
+NAME = os.environ['DB_NAME']
+PW = os.environ['DB_PW']
+HOST = os.environ['DB_HOST']
+PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
+SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
 
 engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PORT, NAME) 
 ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+    'default': SQLAlchemyJobStore(url=engine_string)
 }
 
 job_defaults = {
@@ -60,6 +59,6 @@ def daily_db_update(historicals_list, days_back = 1):
         print("Update failed: {}".format(e))
 
 # job = sched.add_cron_job(daily_db_update, day_of_week='0-6', hour=11, minute=6, args=[historicals])
-job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=11, minute=50, args=[historicals])
+job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=12, minute=3, args=[historicals])
 
 sched.start()
