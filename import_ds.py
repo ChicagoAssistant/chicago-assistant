@@ -41,13 +41,8 @@ def import_training_datasets(city_details):
             print("Request error...")
             return None
     
-    kc = import_kc(kc_url)
-
 
     all_city_reqs = pd.concat(df_list, ignore_index = True)
-
-
-
     return all_city_reqs
 
 

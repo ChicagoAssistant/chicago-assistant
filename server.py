@@ -49,7 +49,7 @@ def webhook():
 
 @app.route('/', methods=['GET'])
 def hello():
-    return "Hello World!"
+    return "Now I love Jim Bachor as much as the next chatbot, but I hope you'll contribute to a safer, more effective Chicago by reporting your 311 requests with me!"
 
 @app.route('/test')
 def test():
