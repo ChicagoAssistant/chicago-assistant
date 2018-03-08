@@ -530,15 +530,17 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
     first_name, last_name, phone, open_311_status, token)
     VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
+    try:
+        with psycopg2.connect(connection_string) as conn2:
+            with conn2.cursor() as cur:
 
-    with psycopg2.connect(connection_string) as conn2:
-        with conn2.cursor() as cur:
+                cur.execute(end_transaction_query, (session_Id, request_time, 
+                service_type, description, request_spec, address_string, lat, lng, email, 
+                first_name, last_name, phone, post_status, token))
 
-            cur.execute(end_transaction_query, (session_Id, request_time, 
-            service_type, description, request_spec, address_string, lat, lng, email, 
-            first_name, last_name, phone, post_status, token))
-
-            conn2.commit()
+                conn2.commit()
+    except Exception as e:
+        print("transaction recording of session_Id {} failed: {}". format(session_Id, e))
 
 
 if __name__ == '__main__':
