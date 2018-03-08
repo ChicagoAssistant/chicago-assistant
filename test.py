@@ -25,15 +25,18 @@ post_data = {'service_code' : POTHOLE_SERVICE_CODE,
              'attribute' : '''{'WHEREIST' : "{'key': 'BIKE', 'name': 'Bike Lane'}",'A511OPTN' : '444-555-5555'}''',
              'lat' : lat,
              'long' : lon,
-             'first_name' : 'John',
-             'last_name' : 'Johnson',
-             'phone_number' : '224-444-4444',
-             'description': 'thisisaffftedddst',
+             'first_name' : '',
+             'last_name' : '',
+             'phone_number' : '224-444-4443',
+             'description': 'thisisanothertest',
              'api_key' : API_KEY}
 
 # requests.post(url, data=post_data)
 
 # https://github.com/googlemaps/google-maps-services-python
+
+url = API_ENDPOINT + '/service_request_id/5a9c61a8e896b449ad0b73e9.json'
+
 
 
 
