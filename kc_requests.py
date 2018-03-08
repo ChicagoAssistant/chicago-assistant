@@ -6,6 +6,7 @@ import pandas as pd
 import csv
 import queue
 import re
+from datetime import datetime
 
 KC_URL = 'https://data.kcmo.org/api/views/7at3-sxhp/rows.csv?accessType=DOWNLOAD'
 
@@ -28,13 +29,14 @@ def import_kc(kc_url):
         kc_requests = kc_requests[kc_cols_to_keep]
         
         # format dataframe
+        print("{}: formatting...".format(datetime.now()))
         for col_name in ["REQUEST TYPE", "CATEGORY", "TYPE"]:
             kc_requests[col_name] = kc_requests[col_name].astype("category")
        
         # remove rows with no URLs to scrape for text descriptions
         kc_requests.dropna(subset=["CASE URL"], inplace = True)
         
-        # add blank column for comments to be scraped
+        # add blank column for comments to be scraped into
         kc_requests['COMMENT_TEXT'] = pd.Series()
         kc_requests.set_index('CASE ID', inplace = True)
 
@@ -44,7 +46,6 @@ def import_kc(kc_url):
 def queue_kc_links(kc_link, kc_queue, visited_set):
     # get request object from case description link url
     if (kc_link == ''):
-        print("first error in queueing")
         kc_req = None
 
     elif urllib.parse.urlparse(kc_link).netloc == '':
@@ -58,6 +59,7 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
         if link_approval:
             try:
                  kc_req = requests.get(kc_link)
+                 
                  if kc_req.status_code == 404 or kc_req.status_code == 403:
                      print("404 error", c_req.status_code)
                      kc_req = None
@@ -67,10 +69,9 @@ def queue_kc_links(kc_link, kc_queue, visited_set):
                 kc_req = None
         else:
             kc_req = None
-            print("link not approved:", kc_req.url)
 
         if kc_req:
-            print("Request object created:", kc_req.url)
+            # print("Request object created:", kc_req.url)
             abs_url = convert_if_relative_url(kc_link, kc_req.url)
             clean_link, frag = urllib.parse.urldefrag(abs_url)
 
@@ -88,34 +89,26 @@ def kc_soup(clean_link, visited_set):
             try:
                 soup_string = clean_req.text.encode('iso-8859-1')
                 visited_set.add(clean_req.url)
-                # print("Made soup!")
             
             except Exception:
                 print('read failed: ' + clean_req.url)
-                soup_string = ''
+                soup_string =  None
                 visited_set.add(clean_req.url)
 
-            if soup_string != '':
+            if soup_string:
                 case_soup = bs4.BeautifulSoup(soup_string, "html5lib")
                 return case_soup
-            else:
-                print("Blank soup")
-        else:
-            print("Already vistied?", (clean_req.url in visited_set))
-    else:
-        print("Already vistied!")
 
 
 
 def pull_comments(case_soup, case_df):
     b_tag = case_soup.find('b', text=re.compile(r'Case ID:'))
-    if b_tag:
-        case_num = int(b_tag.next_sibling)
-
     desc = case_soup.find('rc_descrlong')
-    if desc:
+    
+    if b_tag and desc:
+        case_num = int(b_tag.next_sibling)
         comments = desc.text
-
+        
         if not re.match("^.*(dupe|duplicate|test).*$", comments):
             case_df["COMMENT_TEXT"].loc[case_num] = comments
 
@@ -126,8 +119,8 @@ def convert_if_relative_url(current_url, new_url):
     University of Chicago, inspired by an assignment written by
     Mari Hearst at UC Berkeley
 
-    Attempt to determine whether new_url is a relative URL and if so,
-    use current_url to determine the path and create a new absolute
+    Determine whether new_url is a relative URL and if so, use the
+    current_url to determine the path and create a new absolute
     URL.  Will add the protocol, if that is all that is missing.
 
     Inputs:
@@ -197,8 +190,8 @@ def is_url_ok_to_follow(url, limiting_domain):
         print("fragment error")
         return False
 
-    if parsed_url.query == '':
-        return False
+    # if parsed_url.query == '':
+    #     return False
 
     loc = parsed_url.netloc
     ld = len(limiting_domain)
@@ -212,11 +205,7 @@ def is_url_ok_to_follow(url, limiting_domain):
     return (ext == "" or ext == ".cfm")
 
 
-
-
-
-
-def go(kc_url):
+def go():
     '''
     Crawl Kansas City URLs and generate a pandas dataframe of service request
     details.
@@ -227,6 +216,7 @@ def go(kc_url):
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
+    print("{}: importing...".format(datetime.now()))
     kc_df = import_kc(KC_URL)
     max_pages = kc_df.shape[0]
 
@@ -239,9 +229,11 @@ def go(kc_url):
     # initialize counter for pages visited
     pages_visited = 0
 
+    print("{}: queueing...".format(datetime.now()))
     for link in kc_df["CASE URL"]:
         queue_kc_links(link, kc_queue, visited_set)
 
+    print("{}: visiting...".format(datetime.now()))
     while not kc_queue.empty() and (pages_visited <= max_pages):
         case_url = kc_queue.get()
         case_soup = kc_soup(case_url, visited_set)
@@ -252,9 +244,10 @@ def go(kc_url):
             pages_visited += 1
             pull_comments(case_soup, kc_df)
 
+    print("{}: formatting...".format(datetime.now()))
     kc_df.dropna(axis = 0, how = 'any', subset = ["COMMENT_TEXT"], inplace = True)
     kc_df = kc_df[kc_df["COMMENT_TEXT"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
-    kc_df. =kc_df[["REQUEST TYPE", "COMMENT_TEXT"]]
+    kc_df = kc_df[["REQUEST TYPE", "COMMENT_TEXT"]]
 
     return kc_df
 
