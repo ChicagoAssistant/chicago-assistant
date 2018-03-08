@@ -205,7 +205,7 @@ def is_url_ok_to_follow(url, limiting_domain):
     return (ext == "" or ext == ".cfm")
 
 
-def go():
+def go(kc_queue, visited_set, kc_df):
     '''
     Crawl Kansas City URLs and generate a pandas dataframe of service request
     details.
@@ -216,24 +216,24 @@ def go():
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
-    print("{}: importing...".format(datetime.now()))
-    kc_df = import_kc(KC_URL)
+    # print("{}: importing...".format(datetime.now()))
+    # kc_df = import_kc(KC_URL)
     max_pages = kc_df.shape[0]
 
-    # initialize queue to hold links to scrape
-    kc_queue = queue.Queue()
+    # # initialize queue to hold links to scrape
+    # kc_queue = queue.Queue()
 
-    # initialize set to check whether a link has been visited
-    visited_set = set()
+    # # initialize set to check whether a link has been visited
+    # visited_set = set()
 
-    # initialize counter for pages visited
+    # # initialize counter for pages visited
     pages_visited = 0
 
-    print("{}: queueing...".format(datetime.now()))
-    for link in kc_df["CASE URL"]:
-        queue_kc_links(link, kc_queue, visited_set)
+    # print("{}: queueing...".format(datetime.now()))
+    # for link in kc_df["CASE URL"]:
+    #     queue_kc_links(link, kc_queue, visited_set)
 
-    print("{}: visiting...".format(datetime.now()))
+    # print("{}: visiting...".format(datetime.now()))
     while not kc_queue.empty() and (pages_visited <= max_pages):
         case_url = kc_queue.get()
         case_soup = kc_soup(case_url, visited_set)
@@ -246,8 +246,8 @@ def go():
 
     print("{}: formatting...".format(datetime.now()))
     kc_df.dropna(axis = 0, how = 'any', subset = ["COMMENT_TEXT"], inplace = True)
-    kc_df = kc_df[kc_df["COMMENT_TEXT"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
-    kc_df = kc_df[["REQUEST TYPE", "COMMENT_TEXT"]]
+    # kc_df = kc_df[kc_df["COMMENT_TEXT"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
+    kc_df = kc_df[["REQUEST TYPE", "COMMENTS"]]
 
     return kc_df
 
