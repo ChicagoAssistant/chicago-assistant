@@ -502,7 +502,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
                 num = int(num)
                 unit = unit_index[i]
                 if loc_only:
-                    completion_message = 'Requests for {} in the {} area are typically serviced within {} {}.".format(tablename, neighb, num, unit)
+                    completion_message = "Requests for {} in the {} area are typically serviced within {} {}.".format(tablename, neighb, num, unit)
 
                 else:
                     completion_message = "Requests for {} in the {} area are typically serviced within {} {} at this time of year.".format(tablename, neighb, num, unit)
