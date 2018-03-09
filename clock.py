@@ -49,7 +49,7 @@ if __name__ == '__main__':
         except Exception as e:
             logging.info("Encountered error: {} at {}.".format(e, datetime.now()))
     
-
-    scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=10, args=[historicals], jitter=30)
-
     scheduler.start()
+    scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=10, args=[historicals], jitter=30)
+    scheduler.shutdown()
+
