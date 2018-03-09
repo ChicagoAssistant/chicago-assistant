@@ -368,23 +368,18 @@ ON CONFLICT(service_request_number) DO UPDATE
     except Exception as e:
         print("Update failed: {}".format(e))
 
-@sched.scheduled_job('cron', id='my_job_id', day='last sun')
-def daily_db_update(historicals_list, days_back = 1): 
-    # add error flag, maybe trigger email?
-    all_updates = []
-    try:
-        for service_dict in historicals_list:
-            print("starting {}...".format(service_dict['service_name']))
-            updated = check_updates(service_dict, days_back)
-            clean_updates = dedupe_df(updated, service_dict)
-            update_table(clean_updates, service_dict['service_name'])
-        return "completed without error"
-    except Exception as e:
-        print("Update failed: {}".format(e))
-
-sched = BlockingScheduler()
-sched.add_job(daily_db_update, 'cron', month='6-8,11-12', day='3rd fri', hour='0-3')
-
+# def daily_db_update(historicals_list, days_back = 1): 
+#     # add error flag, maybe trigger email?
+#     all_updates = []
+#     try:
+#         for service_dict in historicals_list:
+#             print("starting {}...".format(service_dict['service_name']))
+#             updated = check_updates(service_dict, days_back)
+#             clean_updates = dedupe_df(updated, service_dict)
+#             update_table(clean_updates, service_dict['service_name'])
+#         return "completed without error"
+#     except Exception as e:
+#         print("Update failed: {}".format(e))
 
  
 

@@ -37,7 +37,7 @@ logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
 
 
 if __name__ == '__main__':
-    scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
+    scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args, jitter=30)
 
     def daily_db_update(historicals_list, days_back = 1): 
         try:
@@ -51,5 +51,5 @@ if __name__ == '__main__':
             logging.info("Encountered error: {} at {}.".format(e, datetime.now()))
         
 
-    job = scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=10, minute=12, args=[historicals])
+    job = scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=6, minute=42, args=[historicals])
     scheduler.start()
