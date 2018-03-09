@@ -7,23 +7,23 @@ from datetime import datetime
 import os
 import logging
 
-# USER = os.environ['DB_USER']
-# NAME = os.environ['DB_NAME']
-# PW = os.environ['DB_PW']
-# HOST = os.environ['DB_HOST']
-# PORT = os.environ['DB_PORT']
-# SSL_DIR = os.path.dirname(__file__)
-# SSL = os.environ['SSL']
-# SSL_PATH = os.path.join(SSL_DIR, SSL)
-
-USER = get_key(find_dotenv(), 'DB_USER')
-NAME = get_key(find_dotenv(), 'DB_NAME')
-PW = get_key(find_dotenv(), 'DB_PW')
-HOST = get_key(find_dotenv(), 'DB_HOST')
-PORT = get_key(find_dotenv(), 'DB_PORT')
-SSL = get_key(find_dotenv(), 'SSL')
+USER = os.environ['DB_USER']
+NAME = os.environ['DB_NAME']
+PW = os.environ['DB_PW']
+HOST = os.environ['DB_HOST']
+PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
+SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
+
+# USER = get_key(find_dotenv(), 'DB_USER')
+# NAME = get_key(find_dotenv(), 'DB_NAME')
+# PW = get_key(find_dotenv(), 'DB_PW')
+# HOST = get_key(find_dotenv(), 'DB_HOST')
+# PORT = get_key(find_dotenv(), 'DB_PORT')
+# SSL = get_key(find_dotenv(), 'SSL')
+# SSL_DIR = os.path.dirname(__file__)
+# SSL_PATH = os.path.join(SSL_DIR, SSL)
 
 engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PORT, NAME) 
 ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
