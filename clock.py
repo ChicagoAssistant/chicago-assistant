@@ -54,6 +54,6 @@ def daily_db_update(historicals_list, days_back = 1):
         print("Update failed: {}".format(e))
 
 # job = sched.add_cron_job(daily_db_update, day_of_week='0-6', hour=11, minute=6, args=[historicals])
-job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=29, args=[historicals])
+job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=32, args=[historicals])
 
 sched.start()
