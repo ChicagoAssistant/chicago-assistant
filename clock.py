@@ -18,14 +18,9 @@ SSL_PATH = os.path.join(SSL_DIR, SSL)
 engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PORT, NAME) 
 ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 
-jobstores = {
-    'default': SQLAlchemyJobStore(url=engine_string)
-}
+jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
 
-job_defaults = {
-    'coalesce': True,
-    'misfire_grace_time': 12
-}
+job_defaults = {'coalesce': True, 'misfire_grace_time': 20}
 
 sched = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
 
@@ -59,6 +54,6 @@ def daily_db_update(historicals_list, days_back = 1):
         print("Update failed: {}".format(e))
 
 # job = sched.add_cron_job(daily_db_update, day_of_week='0-6', hour=11, minute=6, args=[historicals])
-job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=12, minute=5, args=[historicals])
+job = sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=29, args=[historicals])
 
 sched.start()

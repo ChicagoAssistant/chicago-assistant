@@ -10,7 +10,7 @@ from sodapy import Socrata
 from dotenv import get_key, find_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
-
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 USER = get_key(find_dotenv(), 'DB_USER')
 NAME = get_key(find_dotenv(), 'DB_NAME')
@@ -349,24 +349,26 @@ ON CONFLICT(service_request_number) DO UPDATE
     temp_table_q = sql.SQL(update_temp_table_query).format(tbl=sql.Identifier(tablename))
     load_table_q = sql.SQL(load_updates_query).format(tbl=sql.Identifier(tablename))
 
-    with psycopg2.connect(psycopg2_connection_string) as conn2:
-        with conn2.cursor() as cur:
-            print("beginning upload...")
-            cur.execute(temp_table_q)
-            print("made temp table!")
+    try:
+        with psycopg2.connect(psycopg2_connection_string) as conn2:
+            with conn2.cursor() as cur:
+                print("beginning upload...")
+                cur.execute(temp_table_q)
+                print("made temp table!")
 
-            output = io.StringIO()
-            df.to_csv(output, sep='\t', header=False, index=False)
-            output.seek(0)
-        
-            cur.copy_from(output, "tmp_table", null="")   
-            print(load_table_q)
+                output = io.StringIO()
+                df.to_csv(output, sep='\t', header=False, index=False)
+                output.seek(0)
+            
+                cur.copy_from(output, "tmp_table", null="")   
+                print(load_table_q)
 
-            cur.execute(load_table_q)
-            conn2.commit()
+                cur.execute(load_table_q)
+                conn2.commit()
+    except Exception as e:
+        print("Update failed: {}".format(e))
 
-
-
+@sched.scheduled_job('cron', id='my_job_id', day='last sun')
 def daily_db_update(historicals_list, days_back = 1): 
     # add error flag, maybe trigger email?
     all_updates = []
@@ -380,7 +382,9 @@ def daily_db_update(historicals_list, days_back = 1):
     except Exception as e:
         print("Update failed: {}".format(e))
 
-    
+sched = BlockingScheduler()
+sched.add_job(daily_db_update, 'cron', month='6-8,11-12', day='3rd fri', hour='0-3')
+
 
  
 

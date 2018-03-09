@@ -8,3 +8,4 @@ sodapy
 googlemaps
 python-dotenv
 APScheduler==3.0.0
+sqlalchemy
