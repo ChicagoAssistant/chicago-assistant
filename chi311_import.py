@@ -26,12 +26,14 @@ PORT = os.environ['DB_PORT']
 SSL = os.environ['SSL']
 SSL_DIR = os.path.dirname(__file__)
 SSL_PATH = os.path.join(SSL_DIR, SSL)
+APP_TOKEN = os.environ['SODAPY_APPTOKEN']
+
 
 
 psycopg2_connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
-APP_TOKEN = get_key(find_dotenv(), 'SODAPY_APPTOKEN')
+# APP_TOKEN = get_key(find_dotenv(), 'SODAPY_APPTOKEN')
 DOMAIN = 'https://data.cityofchicago.org'
 
 
