@@ -12,14 +12,23 @@ from datetime import datetime, timedelta
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-USER = get_key(find_dotenv(), 'DB_USER')
-NAME = get_key(find_dotenv(), 'DB_NAME')
-PW = get_key(find_dotenv(), 'DB_PW')
-HOST = get_key(find_dotenv(), 'DB_HOST')
-PORT = get_key(find_dotenv(), 'DB_PORT')
-SSL = get_key(find_dotenv(), 'SSL')
+# USER = get_key(find_dotenv(), 'DB_USER')
+# NAME = get_key(find_dotenv(), 'DB_NAME')
+# PW = get_key(find_dotenv(), 'DB_PW')
+# HOST = get_key(find_dotenv(), 'DB_HOST')
+# PORT = get_key(find_dotenv(), 'DB_PORT')
+# SSL = get_key(find_dotenv(), 'SSL')
+
+USER = os.environ['DB_USER']
+NAME = os.environ['DB_NAME']
+PW = os.environ['DB_PW']
+HOST = os.environ['DB_HOST']
+PORT = os.environ['DB_PORT']
+SSL = os.environ['SSL']
 SSL_DIR = os.path.dirname(__file__)
 SSL_PATH = os.path.join(SSL_DIR, SSL)
+
+
 psycopg2_connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
