@@ -29,26 +29,19 @@ engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PO
 
 ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
-job_defaults = {'coalesce': True, 'misfire_grace_time': 20}
+job_defaults = {'coalesce': True}
 
 
 def daily_db_update(historicals_list, days_back = 1): 
-    try:
-        for service_dict in historicals_list:
-            logging.info("starting {} update at {}".format(service_dict['service_name']), datetime.now())
-            
-            updated = check_updates(service_dict, days_back)
-            clean_updates = dedupe_df(updated, service_dict)
-            update_table(clean_updates, service_dict['service_name'])
-            logging.info("Completed without error at {}.".format(datetime.now()))
+    for service_dict in historicals_list:            
+        updated = check_updates(service_dict, days_back)
+        clean_updates = dedupe_df(updated, service_dict)
+        update_table(clean_updates, service_dict['service_name'])
 
-    except Exception as e:
-         logging.info("Encountered error: {} at {}.".format(e, datetime.now()))
 
 if __name__ == "__main__":
     scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
     logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
-    scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=14, minute=21, args=[historicals], jitter=30)
-    scheduler.add_job(daily_db_update, 'interval', minutes=2)
+    # scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=14, minute=21, args=[historicals], jitter=30)
     scheduler.start()
-
+    scheduler.add_job(daily_db_update, 'interval', minutes=2)
