@@ -43,5 +43,6 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
     logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
     # scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=14, minute=21, args=[historicals], jitter=30)
-    scheduler.start()
+ 
     scheduler.add_job(daily_db_update, 'interval', minutes=2)
+    scheduler.start()
