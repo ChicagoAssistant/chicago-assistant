@@ -51,5 +51,5 @@ if __name__ == '__main__':
             logging.info("Encountered error: {} at {}.".format(e, datetime.now()))
         
 
-    job = scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=6, minute=42, args=[historicals])
+    job = scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=52, args=[historicals])
     scheduler.start()
