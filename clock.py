@@ -2,7 +2,7 @@ from chi311_import import historicals, check_updates, dedupe_df, update_table
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from dotenv import get_key, find_dotenv
+# from dotenv import get_key, find_dotenv
 from datetime import datetime
 import os
 import logging
