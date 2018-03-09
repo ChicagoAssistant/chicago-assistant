@@ -7,10 +7,9 @@ import psycopg2
 import pandas as pd
 from psycopg2 import sql
 from sodapy import Socrata
-from dotenv import get_key, find_dotenv
+# from dotenv import get_key, find_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
-from apscheduler.schedulers.blocking import BlockingScheduler
 
 # USER = get_key(find_dotenv(), 'DB_USER')
 # NAME = get_key(find_dotenv(), 'DB_NAME')
