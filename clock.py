@@ -32,10 +32,6 @@ jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
 job_defaults = {'coalesce': True, 'misfire_grace_time': 20}
 
 
-scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
-logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.INFO)
-
-
 def daily_db_update(historicals_list, days_back = 1): 
     try:
         for service_dict in historicals_list:
@@ -49,7 +45,10 @@ def daily_db_update(historicals_list, days_back = 1):
     except Exception as e:
          logging.info("Encountered error: {} at {}.".format(e, datetime.now()))
 
-
-scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=10, minute=12, args=[historicals], jitter=30)
-scheduler.start()
+if __name__ == "__main__":
+    scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
+    logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
+    scheduler.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=14, minute=21, args=[historicals], jitter=30)
+    scheduler.add_job(daily_db_update, 'interval', minutes=2)
+    scheduler.start()
 
