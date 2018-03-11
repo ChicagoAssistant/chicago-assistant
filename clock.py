@@ -55,7 +55,7 @@ logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
 #         },
 #     ]
 
-update_job_id = 1000
+
 
 # @sched.scheduled_job('cron', id=update_job_id, day_of_week='0-6', hour=22, minute=18, args=[historicals], jitter=30)
 def daily_db_update(historicals_list, days_back = 1): 
@@ -64,7 +64,7 @@ def daily_db_update(historicals_list, days_back = 1):
         clean_updates = dedupe_df(updated, service_dict)
         update_table(clean_updates, service_dict['service_name'])
 
-    update_job_id += 1
+    update_job_id = clean_updates.loc[0,'service_request_number']
 
 sched.add_job(func=daily_db_update, trigger='interval', minutes=5, id=update_job_id)
 
