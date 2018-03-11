@@ -30,11 +30,13 @@ engine_string = "postgresql+psycopg2://{}:{}@{}:{}/{}".format(USER, PW, HOST, PO
 
 ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 
+
 jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
+executors = {'default': ThreadPoolExecutor(10)}
 job_defaults = {'coalesce': True, 'max_instances':1}
 
-sched = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
-logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.INFO)
+sched = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
+logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
 
 
 # class ScheduledJobConfigs(object):
@@ -52,7 +54,7 @@ logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.INFO)
 #         },
 #     ]
 
-update_job_id = 0
+update_job_id = 1000
 
 # @sched.scheduled_job('cron', id=update_job_id, day_of_week='0-6', hour=22, minute=18, args=[historicals], jitter=30)
 def daily_db_update(historicals_list, days_back = 1): 
@@ -63,8 +65,8 @@ def daily_db_update(historicals_list, days_back = 1):
 
     update_job_id += 1
 
-# scheduler.add_job(daily_db_update, 'interval', minutes=2)
+sched.add_job(func=daily_db_update, trigger='interval', minutes=5, id=update_job_id)
 
-sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
+# sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
 
 sched.start()
