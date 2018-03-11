@@ -66,7 +66,7 @@ def daily_db_update(historicals_list, days_back = 1):
 
 if __name__ == '__main__':
     update_job_id = 'nightly_update_' + datetime.now().isoformat() 
-    sched.add_job(func=daily_db_update, trigger='interval', minutes=5, id=update_job_id)
+    sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
 
     # sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
 
