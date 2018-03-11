@@ -11,6 +11,8 @@ from flask import render_template
 # from psycopg2 import sql
 import googlemaps
 import requests
+from clock import sched
+from chi311_import import historicals, check_updates, dedupe_df, update_table
 
 app = Flask(__name__)
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
@@ -543,5 +545,18 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
         print("transaction recording of session_Id {} failed: {}". format(session_Id, e))
 
 
+
+def daily_db_update(historicals_list, days_back = 1): 
+    for service_dict in historicals_list:            
+        updated = check_updates(service_dict, days_back)
+        clean_updates = dedupe_df(updated, service_dict)
+        update_table(clean_updates, service_dict['service_name'])
+
+
 if __name__ == '__main__':
 	app.run(debug=True)
+    
+    update_job_id = 'nightly_update_' + datetime.now().isoformat() 
+    sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
+    if not sched.running:
+        sched.start()
