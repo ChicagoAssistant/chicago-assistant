@@ -554,7 +554,7 @@ def daily_db_update(historicals_list, days_back = 1):
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+    app.run(debug=True)
     
     update_job_id = 'nightly_update_' + datetime.now().isoformat() 
     sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
