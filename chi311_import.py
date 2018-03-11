@@ -10,6 +10,8 @@ from sodapy import Socrata
 # from dotenv import get_key, find_dotenv
 from datetime import datetime, timedelta
 import logging
+from clock import sched
+
 
 
 # USER = get_key(find_dotenv(), 'DB_USER')
@@ -392,6 +394,22 @@ ON CONFLICT(service_request_number) DO UPDATE
 #         return "completed without error"
 #     except Exception as e:
 #         print("Update failed: {}".format(e))
+
+def daily_db_update(historicals_list, days_back = 1): 
+    for service_dict in historicals_list:            
+        updated = check_updates(service_dict, days_back)
+        clean_updates = dedupe_df(updated, service_dict)
+        update_table(clean_updates, service_dict['service_name'])
+
+
+if __name__ == '__main__':
+    update_job_id = 'nightly_update_' + datetime.now().isoformat() 
+
+    sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
+
+    if not sched.running:
+        sched.start()
+    # sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
 
 
  

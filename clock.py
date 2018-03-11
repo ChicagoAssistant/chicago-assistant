@@ -1,4 +1,4 @@
-from chi311_import import historicals, check_updates, dedupe_df, update_table
+# from chi311_import import historicals, check_updates, dedupe_df, update_table
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -57,17 +57,3 @@ logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
 
 
 # @sched.scheduled_job('cron', id=update_job_id, day_of_week='0-6', hour=22, minute=18, args=[historicals], jitter=30)
-def daily_db_update(historicals_list, days_back = 1): 
-    for service_dict in historicals_list:            
-        updated = check_updates(service_dict, days_back)
-        clean_updates = dedupe_df(updated, service_dict)
-        update_table(clean_updates, service_dict['service_name'])
-
-
-if __name__ == '__main__':
-    update_job_id = 'nightly_update_' + datetime.now().isoformat() 
-    sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
-
-    # sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
-
-    sched.start()
