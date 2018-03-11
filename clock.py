@@ -34,7 +34,7 @@ ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 
 jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
 executors = {'default': ThreadPoolExecutor(2)}
-job_defaults = {'coalesce': True, 'max_instances':1}
+job_defaults = {'coalesce': False, 'max_instances':1}
 
 sched = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
 logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
