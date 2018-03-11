@@ -33,7 +33,7 @@ ssl_args = {"sslmode": "require", "sslrootcert": SSL_PATH}
 
 
 jobstores = {'default': SQLAlchemyJobStore(url=engine_string)}
-executors = {'default': ThreadPoolExecutor(10)}
+executors = {'default': ThreadPoolExecutor(2)}
 job_defaults = {'coalesce': True, 'max_instances':1}
 
 sched = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc, engine_options=ssl_args)
@@ -56,7 +56,6 @@ logging.basicConfig(filename='dailyUpdateLog.txt', level=logging.DEBUG)
 #     ]
 
 
-
 # @sched.scheduled_job('cron', id=update_job_id, day_of_week='0-6', hour=22, minute=18, args=[historicals], jitter=30)
 def daily_db_update(historicals_list, days_back = 1): 
     for service_dict in historicals_list:            
@@ -64,10 +63,11 @@ def daily_db_update(historicals_list, days_back = 1):
         clean_updates = dedupe_df(updated, service_dict)
         update_table(clean_updates, service_dict['service_name'])
 
-    update_job_id = clean_updates.loc[0,'service_request_number']
 
-sched.add_job(func=daily_db_update, trigger='interval', minutes=5, id=update_job_id)
+if __name__ == '__main__':
+    update_job_id = 'nightly_update_' + datetime.now().isoformat() 
+    sched.add_job(func=daily_db_update, trigger='interval', minutes=5, id=update_job_id)
 
-# sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
+    # sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
 
-sched.start()
+    sched.start()
