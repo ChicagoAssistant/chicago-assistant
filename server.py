@@ -12,6 +12,7 @@ import googlemaps
 import requests
 from clock import sched
 from chi311_import import historicals, check_updates, dedupe_df, update_table
+import queries
 
 app = Flask(__name__)
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
@@ -389,70 +390,8 @@ def get_tablename(db_key):
 
 
 def request_triggerd_query(tablename, input_latitude, input_longitude):
-    time_only ='''
-    SELECT
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-    THEN justify_days(AVG("response_time"))
-    END as months,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-    END as weeks,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-    END as days
-    FROM {} a
-    INNER JOIN (SELECT service_request_number, EXTRACT(WEEK FROM a.creation_date) as week_nunm
-      FROM {} a 
-      WHERE age(now(), creation_date) < '4 years' 
-      AND status IN ('Completed', 'Completed - Dup')
-      AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2) ) AS recent
-    ON recent.service_request_number = a.service_request_number;'''
-
-    
-    loc_only_neighborhood = '''
-    SELECT
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-    THEN justify_days(AVG("response_time"))
-    END as months,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) >= 14
-    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-    END as weeks,
-    SELECT b.pri_neigh as neighborhood,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-    END as days,
-    FROM {tbl} a
-    INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
-    WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
-    WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
-    AND status IN ('Completed', 'Completed - Dup')
-    AND age(now(), creation_date) < '2 years' 
-    GROUP BY b.pri_neigh;'''
-
-
-    time_loc_neighborhood = '''
-    SELECT b.pri_neigh as neighborhood,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
-    THEN justify_days(AVG("response_time"))
-    END as months,
-    CASE WHEN EXTRACT(DAY FROM AVG(response_time)) >= 14
-    THEN CEIL(EXTRACT(DAY FROM AVG("response_time"))/7)
-    END as weeks,
-    CASE WHEN EXTRACT(DAY FROM AVG("response_time")) < 14
-    THEN CEIL((EXTRACT(DAY FROM AVG("response_time"))))
-    END as days
-    FROM {tbl} a
-    INNER JOIN neighborhoods b ON ST_Within(ST_SetSRID(ST_MakePoint(a.longitude, a.latitude),4326), b.geom)
-    WHERE b.gid IN (SELECT b.gid FROM neighborhoods b  
-    WHERE ST_Contains(b.geom, ST_SetSRID(ST_MakePoint(%s, %s),4326)))
-    AND age(now(), creation_date) < '4 years' 
-    AND status IN ('Completed', 'Completed - Dup')
-    AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2)
-    GROUP BY b.pri_neigh;'''
-    
-
     # fill table parameters in query for initial query
-    both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
+    both_q = sql.SQL(queries.TIME_LOC).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
     conn2 = psycopg2.connect(CONNECTION_STRING)
@@ -467,7 +406,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         loc_only = True
         
         # check database for average resolution time in neighborhood regardless of time
-        loc_q = sql.SQL(loc_only_neighborhood).format(tbl=sql.Identifier(tablename))
+        loc_q = sql.SQL(queries.LOC_ONLY).format(tbl=sql.Identifier(tablename))
         cur.execute(loc_q, [input_longitude, input_latitude])
         res = cur.fetchone()
         print(res)
@@ -475,7 +414,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
         if res and all(v is None for v in res):
             loc_only = False
             # check database for average resolution time at time of year regardless of neighborhood
-            time_q = sql.SQL(time_only).format(tbl=sql.Identifier(tablename))
+            time_q = sql.SQL(queries.TIME_ONLY).format(tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
             print(res)
@@ -522,17 +461,11 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
     request_time = req['timestamp']
     req_status = req['status']['code']
 
-    end_transaction_query ='''
-    INSERT INTO dialogflow_transactions (session_Id, request_time, 
-    service_type, description, request_details, address_string, lat, lng, email, 
-    first_name, last_name, phone, open_311_status, token)
-    VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-    '''
     try:
         with psycopg2.connect(CONNECTION_STRING) as conn2:
             with conn2.cursor() as cur:
 
-                cur.execute(end_transaction_query, (session_Id, request_time, 
+                cur.execute(queries.RECORD_TRANSACTION, (session_Id, request_time, 
                 service_type, description, request_spec, address_string, lat, lng, email, 
                 first_name, last_name, phone, post_status, token))
 
