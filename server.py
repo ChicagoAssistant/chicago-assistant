@@ -8,7 +8,6 @@ from flask import request
 from flask import make_response
 import random
 from flask import render_template
-# from psycopg2 import sql
 import googlemaps
 import requests
 from clock import sched
@@ -29,7 +28,7 @@ PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
 SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
+CONNECTION_STRING = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
 @app.route('/webhook', methods=['POST'])
@@ -66,7 +65,6 @@ def makeWebhookResult(req):
         - req (json): information passed from DialogFlow webhook
     '''
     action = get_action(req)
-    print('****ACTION PRINT*****', action, '***************')
     if action == 'name':
         return followupEvent('get_address')
 
@@ -75,8 +73,6 @@ def makeWebhookResult(req):
 
     if action == 'address.corrected':
         return process_address(req, True)
-        # service_type = get_service_type(req)
-        # return followupEvent(service_type)
 
     if action == 'request.complete':
         #process the average number of days to complete request
@@ -459,7 +455,7 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
     both_q = sql.SQL(time_loc_neighborhood).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
-    conn2 = psycopg2.connect(connection_string)
+    conn2 = psycopg2.connect(CONNECTION_STRING)
     cur = conn2.cursor()
     cur.execute(both_q, [input_longitude, input_latitude])
     res = cur.fetchone()
@@ -533,7 +529,7 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
     VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
     try:
-        with psycopg2.connect(connection_string) as conn2:
+        with psycopg2.connect(CONNECTION_STRING) as conn2:
             with conn2.cursor() as cur:
 
                 cur.execute(end_transaction_query, (session_Id, request_time, 
