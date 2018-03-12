@@ -477,7 +477,7 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
     except Exception as e:
         print("transaction recording of session_Id {} failed: {}". format(session_Id, e))
 
-s
+
 
 def daily_db_update(historicals_list, days_back = 1): 
     for service_dict in historicals_list:            
