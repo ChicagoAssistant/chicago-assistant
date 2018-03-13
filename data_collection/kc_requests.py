@@ -35,8 +35,7 @@ def import_kc(kc_url):
 
         # create dataframe
         kc_requests = pd.DataFrame(kc_reqs[1:], columns = kc_reqs[0])
-        kc_requests = kc_requests[kc_requests["REQUEST TYPE"].str.lower().str.contains(" rat | rodent | mouse | pot | hole | pothole | street light | streetlight | light out")]
-
+        kc_requests = kc_requests[kc_requests["REQUEST TYPE"].str.lower().str.contains(" rat|rodent|mouse| pot | hole |pothole|potholes|street light|streetlight|light out")]
         kc_requests = kc_requests[kc_cols_to_keep]
         
         # format dataframe
