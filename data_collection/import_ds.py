@@ -9,37 +9,43 @@ def import_training_datasets(city_details):
     available on a website.
 
     Inputs:
-        city_details: dictionary containing a city name, URL from which the 
-        dataset can be downloaded, and specific columns containing pertinent
-        training data
+        - city_details (dictionary): containing a city name, URL from which the 
+            dataset can be downloaded, and specific columns containing pertinent
+            training data
 
-    Output: dataframe of all cities' training data
+    Output: 
+        - all_city_reqs (dataframe) service type and raw text columns from all 
+            cities
+
+    Attribution: GET request decoding and reformatting (lines 33-36) follow
+                 example provided on StackOverflow "Use python requests to
+                download CSV:" (https://stackoverflow.com/questions/35371043/use-python-requests-to-download-csv)
     '''
     training_columns = ['service_type', 'description']
     all_city_reqs = pd.DataFrame(columns = training_columns)
     df_list = [all_city_reqs]
     
     for city in city_details.keys():
+        try: 
+            download = requests.get(city_details[city]['url'])
 
-        download = requests.get(city_details[city]['url'])
+            # Continue if "success" response code
+            if download.status_code == 200:
 
-        # Continue if "success" response code
-        if download.status_code == 200:
+                decoded_dl = download.content.decode('utf-8')
+                req_reader = csv.reader(decoded_dl.splitlines(), delimiter = ',')
+                city_reqs = list(req_reader)
 
-            decoded_dl = download.content.decode('utf-8')
-            req_reader = csv.reader(decoded_dl.splitlines(), delimiter = ',')
-            city_reqs = list(req_reader)
+                city_df = pd.DataFrame(city_reqs[1:], columns = city_reqs[0])
+                city_df = city_df[ city_details[city]['cols_to_keep'] ]
+                city_df.columns = all_city_reqs.columns
 
-            city_df = pd.DataFrame(city_reqs[1:], columns = city_reqs[0])
-            city_df = city_df[ city_details[city]['cols_to_keep'] ]
-            city_df.columns = all_city_reqs.columns
+                print(city)
+                print(city_df.head())
+                df_list.append(city_df)
+        except Exception as e:
+            print("Status Code: {}; Request error: {}".format(download.status_code, e))
 
-            print(city)
-            print(city_df.head())
-            df_list.append(city_df)
-        else:
-            print("Request error...")
-            return None
     
 
     all_city_reqs = pd.concat(df_list, ignore_index = True)
@@ -47,6 +53,13 @@ def import_training_datasets(city_details):
 
 
 def go():
+    '''
+    Import 311 service request datasets from pre-identified cities with raw text fields included.
+
+    Outputs:
+        - req (dataframe) dataframe of cities' service type and raw request 
+            text for use in identifiying itnent and entity keywords
+    '''
     city_details = {'Baton Rouge': {'cols_to_keep': ["TYPE", "COMMENTS"], 
                     'url': 'https://data.brla.gov/api/views/7ixm-mnvx/rows.csv?accessType=DOWNLOAD'},
                     'Cincinnati': {'cols_to_keep': ["SERVICE_NAME", "DESCRIPTION"], 

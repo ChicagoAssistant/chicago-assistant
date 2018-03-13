@@ -7,19 +7,8 @@ import psycopg2
 import pandas as pd
 from psycopg2 import sql
 from sodapy import Socrata
-# from dotenv import get_key, find_dotenv
 from datetime import datetime, timedelta
 import logging
-
-
-
-# USER = get_key(find_dotenv(), 'DB_USER')
-# NAME = get_key(find_dotenv(), 'DB_NAME')
-# PW = get_key(find_dotenv(), 'DB_PW')
-# HOST = get_key(find_dotenv(), 'DB_HOST')
-# PORT = get_key(find_dotenv(), 'DB_PORT')
-# SSL = get_key(find_dotenv(), 'SSL')
-# APP_TOKEN = get_key(find_dotenv(), 'SODAPY_APPTOKEN')
 
 
 USER = os.environ['DB_USER']
@@ -32,8 +21,6 @@ APP_TOKEN = os.environ['SODAPY_APPTOKEN']
 
 SSL_DIR = os.path.dirname(__file__)
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-
-
 
 
 psycopg2_connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
@@ -364,40 +351,21 @@ ON CONFLICT(service_request_number) DO UPDATE
     temp_table_q = sql.SQL(update_temp_table_query).format(tbl=sql.Identifier(tablename))
     load_table_q = sql.SQL(load_updates_query).format(tbl=sql.Identifier(tablename))
 
-    # try:
-    with psycopg2.connect(psycopg2_connection_string) as conn2:
-        with conn2.cursor() as cur:
-            # print("beginning upload...")
-            cur.execute(temp_table_q)
-            # print("made temp table!")
+    try:
+        with psycopg2.connect(psycopg2_connection_string) as conn2:
+            with conn2.cursor() as cur:
+                cur.execute(temp_table_q)
 
-            output = io.StringIO()
-            df.to_csv(output, sep='\t', header=False, index=False)
-            output.seek(0)
+                output = io.StringIO()
+                df.to_csv(output, sep='\t', header=False, index=False)
+                output.seek(0)
 
-            cur.copy_from(output, "tmp_table", null="")   
-            print(load_table_q)
+                cur.copy_from(output, "tmp_table", null="")   
+                print(load_table_q)
 
-            cur.execute(load_table_q)
-            conn2.commit()
-    # except Exception as e:
-    #     print("Update failed: {}".format(e))
-
-# def daily_db_update(historicals_list, days_back = 1): 
-#     try:
-#         for service_dict in historicals_list:
-#             print("starting {}...".format(service_dict['service_name']))
-#             updated = check_updates(service_dict, days_back)
-#             clean_updates = dedupe_df(updated, service_dict)
-#             update_table(clean_updates, service_dict['service_name'])
-#         return "completed without error"
-#     except Exception as e:
-#         print("Update failed: {}".format(e))
-
-
-    # sched.add_job(daily_db_update, 'cron', day_of_week='0-6', hour=3, minute=10, args=[historicals])
-
-
- 
+                cur.execute(load_table_q)
+                conn2.commit()
+    except Exception as e:
+        print("Update failed: {}".format(e))
 
 

@@ -1,3 +1,6 @@
+
+# query for average historical resolution time for given service request type 
+# within two weeks of the triggering (new) request time
 TIME_ONLY ='''
     SELECT
     CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
@@ -17,7 +20,9 @@ TIME_ONLY ='''
       AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2) ) AS recent
     ON recent.service_request_number = a.service_request_number;'''
 
-    
+ 
+# query for average historical resolution time for given service request type 
+# in the neighborhood corresponding to a given latitude and longitude
 LOC_ONLY = '''
     SELECT
     CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
@@ -38,7 +43,9 @@ LOC_ONLY = '''
     AND age(now(), creation_date) < '2 years' 
     GROUP BY b.pri_neigh;'''
 
-
+# query for average historical resolution time for given service request type 
+# in the neighborhood corresponding to a given latitude and longitude within 
+# two weeks of the triggering (new) request time
 TIME_LOC = '''
     SELECT b.pri_neigh as neighborhood,
     CASE WHEN EXTRACT(DAY FROM AVG("response_time")) > 60
@@ -59,6 +66,8 @@ TIME_LOC = '''
     AND EXTRACT(WEEK FROM a.creation_date) BETWEEN (EXTRACT(WEEK FROM now()) - 2) AND (EXTRACT(WEEK FROM now()) + 2)
     GROUP BY b.pri_neigh;'''
 
+# query to insert Dialogflow and Open311 POST request details into Postgres 
+# database
 RECORD_TRANSACTION ='''
     INSERT INTO dialogflow_transactions (session_Id, request_time, 
     service_type, description, request_details, address_string, lat, lng, email, 
@@ -66,4 +75,5 @@ RECORD_TRANSACTION ='''
     VALUES (%s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     '''
     
+
 

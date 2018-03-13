@@ -1,12 +1,11 @@
 import urllib
 import json
 import os
-import psycopg2 
+import psycopg2
 from psycopg2 import sql
 from flask import Flask
 from flask import request
 from flask import make_response
-import random
 from flask import render_template
 import googlemaps
 import requests
@@ -29,7 +28,8 @@ PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
 SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-CONNECTION_STRING = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
+CONNECTION_STRING = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(
+    NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
 @app.route('/webhook', methods=['POST'])
@@ -37,7 +37,7 @@ def webhook():
     '''
     Recieves and responds to DialogFlow webhook post requests.
     '''
-    req = request.get_json(silent = True, force = True)
+    req = request.get_json(silent=True, force=True)
     print('Request:\n', json.dumps(req, indent=4))
     with open('data.json', 'w') as f:
         json.dump(req, f)
@@ -49,9 +49,11 @@ def webhook():
 
     return r
 
+
 @app.route('/', methods=['GET'])
 def hello():
     return "Hello World!"
+
 
 @app.route('/test')
 def test():
@@ -76,23 +78,23 @@ def makeWebhookResult(req):
         return process_address(req, True)
 
     if action == 'request.complete':
-        #process the average number of days to complete request
+        # process the average number of days to complete request
         status_message = post_request(req)
         service_type = get_service_type(req)
         table = get_tablename(service_type)
         lat, lng, formatted_address = return_address_params(req)
         completion_message = request_triggerd_query(table, lat, lng)
-        
+
         data = {"completion_time": completion_message,
                 "post_status": status_message}
-                     
+
         return followupEvent('completion_time', data)
 
 
-def process_address(req, corrected = False):
+def process_address(req, corrected=False):
     '''
-    Manages collection of viable address. If an adequate address is given 
-    (i.e. a single match is found via google maps autocomplete), then 
+    Manages collection of viable address. If an adequate address is given
+    (i.e. a single match is found via google maps autocomplete), then
     the conversation continues. If there aren't any matches, then the
     conversation will direct the user to enter the address again. In the case
     that there is more than one match, this function will pass back up to
@@ -145,7 +147,7 @@ def post_request(req):
     Extracts all required data from DialogFlow post request containing
     all user inputs, structures the data into a dictionary which can
     then be passed as a post request to the Chicago Open311 environment.
-    
+
     Inputs:
         - req (json): information passed from DialogFlow webhook containing
             user inputs
@@ -166,31 +168,53 @@ def post_request(req):
     try:
         email = parameters['email']
         phone = parameters['phone-number']
-    except:
+    except BaseException:
         email = ''
         phone = ''
     first_name = parameters['first-name']
     last_name = parameters['last-name']
     lat, lng, address_string = return_address_params(req)
-    post_data = structure_post_data(service_code, attribute, lat, lng, description,
-                 address_string, email, first_name, last_name, phone)
+    post_data = structure_post_data(
+        service_code,
+        attribute,
+        lat,
+        lng,
+        description,
+        address_string,
+        email,
+        first_name,
+        last_name,
+        phone)
 
     print('OPEN_311_POST_REQUEST:', post_data)
-    response = requests.post(url, data= post_data)
+    response = requests.post(url, data=post_data)
     print('OPEN_311_RESPONSE:', response.text)
     try:
         token = response.json()[0]['token']
-    except:
+    except BaseException:
         token = ''
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
 
-    write_to_db(req, token, service_type, request_spec, lat, lng, description,
-                 address_string, status_code, email, first_name, last_name, phone)
+    write_to_db(
+        req,
+        token,
+        service_type,
+        request_spec,
+        lat,
+        lng,
+        description,
+        address_string,
+        status_code,
+        email,
+        first_name,
+        last_name,
+        phone)
 
     return status_message
 
-def followupEvent(event_key, data = None):
+
+def followupEvent(event_key, data=None):
     '''
     Helper function that returns the webhook response needed
     based on where the conversation needs to go next. The 'events'
@@ -210,9 +234,9 @@ def followupEvent(event_key, data = None):
     events = {'pothole': 'pothole_request',
               'rodent': 'rodent_request',
               'street light': 'street_light_request',
-              'completion_time': 'completion_time', 
+              'completion_time': 'completion_time',
               'get_address': 'get-address',
-              'address_correct':'address-correct'}
+              'address_correct': 'address-correct'}
 
     event = events[event_key]
 
@@ -232,8 +256,8 @@ def filter_city(city, gmaps_locs):
     Outputs:
         - locations (list of dict(s)): filtered locations for city of interest
     '''
-    locations = [gmaps_loc for gmaps_loc in gmaps_locs 
-                if city in gmaps_loc['description']]
+    locations = [gmaps_loc for gmaps_loc in gmaps_locs
+                 if city in gmaps_loc['description']]
     return locations
 
 
@@ -275,17 +299,17 @@ def get_address_recs(matched_addresses):
             places autocomplete
     Outputs:
         - recommendations (dict): three addresses in a dictionary in the
-            required format to be passed back to DialogFlow as data in a 
+            required format to be passed back to DialogFlow as data in a
             followupEvent dictionary.
     '''
-    address_recs = ['','','']
+    address_recs = ['', '', '']
     for num, matched_addresses in enumerate(matched_addresses[:3]):
         address = matched_addresses['description']
         address_recs[num] = address
 
-    recommendations = {"address1" : address_recs[0],
-                       "address2" : address_recs[1],
-                       "address3" : address_recs[2]}
+    recommendations = {"address1": address_recs[0],
+                       "address2": address_recs[1],
+                       "address3": address_recs[2]}
 
     return recommendations
 
@@ -312,27 +336,27 @@ def generate_post_status_message(status_code):
     '''
     status_messages = {201: 'Your request has been submitted successfully!',
                        400: 'Your request is a duplicate in our system!'}
- 
+
     return status_messages[status_code]
 
 
 def structure_post_data(service_code, attribute, lat, lng, description,
-                 address_string, email, first_name, last_name, phone):
+                        address_string, email, first_name, last_name, phone):
     '''
-    Helper function to structure all user inputs into appropriate 
+    Helper function to structure all user inputs into appropriate
     dictionary format that will be passed to Open311 systems.
     '''
-    post_data = {'service_code' : service_code,
-             'attribute' : attribute,
-             'lat' : lat,
-             'long' : lng,
-             'first_name' : first_name,
-             'last_name' : last_name,
-             'email': email,
-             'address_string': address_string,
-             'phone_number' : phone,
-             'description': description,
-             'api_key' : OPEN_311_APPTOKEN}
+    post_data = {'service_code': service_code,
+                 'attribute': attribute,
+                 'lat': lat,
+                 'long': lng,
+                 'first_name': first_name,
+                 'last_name': last_name,
+                 'email': email,
+                 'address_string': address_string,
+                 'phone_number': phone,
+                 'description': description,
+                 'api_key': OPEN_311_APPTOKEN}
 
     return post_data
 
@@ -342,18 +366,18 @@ def generate_attribute(service_type, request_spec):
     Helper function to create dictionary needed for the Open311 post request.
     '''
     attributes = {
-    'pothole': 
-    {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
-     'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
-     'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
-     'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
-     'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
-    'rodent':  
-    {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
-     'no':  {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
-    'street light': 
-    {'completely out': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
-     'on and off': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
+        'pothole':
+        {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
+         'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
+         'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
+         'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
+         'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
+        'rodent':
+        {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
+         'no': {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
+        'street light':
+        {'completely out': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
+         'on and off': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
 
     return attributes[service_type][request_spec]
 
@@ -381,16 +405,42 @@ def geocode(address):
 
 
 def get_tablename(db_key):
-
-    db_map = {'pothole': 'potholes','rodent': 'rodents', 
-              'street light': 'streetlights', 
+    '''
+    Return name of associated Postgres database table from Open311/ 
+    Dialogflow service request type names
+    '''
+    db_map = {'pothole': 'potholes', 'rodent': 'rodents',
+              'street light': 'streetlights',
               'dialogflow': 'dialogflow_transactions'}
 
     return db_map[db_key]
 
 
 def request_triggerd_query(tablename, input_latitude, input_longitude):
-    # fill table parameters in query for initial query
+    '''
+    Given a user's location and the type of request, query average historical
+    resolution time for the two weeks pre- and post- today's day/ month in the 
+    last four years for the type of request. Limit query to the neighborhood 
+    containing reported location according to Chicago Open Data Portal 
+    Neighborhood Boundaries. 
+
+    Inputs:
+        - tablename (string): name of table in Postgres database associated with
+            customer's service request type 
+        - input_latitude (float): latitude associated with customer's address 
+            returned from googlemaps API
+        - input_longitude (float): longitude associated with customer's address 
+            returned from googlemaps API
+
+    Output: 
+        - completion_message (str): formatted message indicating historical
+            average response time  
+
+    Attribution:
+        - Calls to psycopg2.sql function crafted based on examples in psycog2 
+            documentation for parameterizing table names in SQL queries via 
+            Python (http://initd.org/psycopg/docs/sql.html)
+    '''
     both_q = sql.SQL(queries.TIME_LOC).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
@@ -402,10 +452,12 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
 
     unit_index = {0: 'months', 1: 'weeks', 2: 'days'}
 
+    # if there is no information on the specific neighborhood at the given time
+    # of year, check for that neighborhood only; check for that time only if there
+    # are no results for the given neighborhood
     if res and all(v is None for v in res):
         loc_only = True
-        
-        # check database for average resolution time in neighborhood regardless of time
+
         loc_q = sql.SQL(queries.LOC_ONLY).format(tbl=sql.Identifier(tablename))
         cur.execute(loc_q, [input_longitude, input_latitude])
         res = cur.fetchone()
@@ -413,7 +465,6 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
 
         if res and all(v is None for v in res):
             loc_only = False
-            # check database for average resolution time at time of year regardless of neighborhood
             time_q = sql.SQL(queries.TIME_ONLY).format(tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
@@ -422,13 +473,15 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
     cur.close()
     conn2.close()
 
- 
-    if res and len(res) == 3: 
+    # for time-only results, there will only be three entries in the response 
+    # tuple (res)
+    if res and len(res) == 3:
         for i, num in enumerate(res):
             if num:
                 num = int(num)
                 unit = unit_index[i]
-                completion_message = "Requests for {} are typically serviced within {} {} at this time of year.".format(tablename, num, unit)
+                completion_message = "Requests for {} are typically serviced within {} {} at this time of year.".format(
+                    tablename, num, unit)
                 return completion_message
                 print(res)
 
@@ -439,25 +492,32 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
                 num = int(num)
                 unit = unit_index[i]
                 if loc_only:
-                    completion_message = "Requests for {} in the {} area are typically serviced within {} {}.".format(tablename, neighb, num, unit)
+                    completion_message = "Requests for {} in the {} area are typically serviced within {} {}.".format(
+                        tablename, neighb, num, unit)
 
                 else:
-                    completion_message = "Requests for {} in the {} area are typically serviced within {} {} at this time of year.".format(tablename, neighb, num, unit)
+                    completion_message = "Requests for {} in the {} area are typically serviced within {} {} at this time of year.".format(
+                        tablename, neighb, num, unit)
 
                 return completion_message
 
+    # if no results returned, proceed with default message.
     if not res:
-        completion_message = "Thank you for your 311 {} request! If you provided your contact information, we'll let you know when the city marks it complete.".format(tablename)
+        completion_message = "Thank you for your 311 {} request! If you provided your contact information, we'll let you know when the city marks it complete.".format(
+            tablename)
         return completion_message
 
 
-
-def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
-                address_string, post_status, email = None, first_name = None, 
-                last_name = None, phone = None):
-
-
-    session_Id = req['sessionId'][:-4] + str(random.randint(1000,9999))
+def write_to_db(req, token, service_type, request_spec, lat, lng, description,
+                address_string, post_status, email=None, first_name=None,
+                last_name=None, phone=None):
+    '''
+    Captures details of a Dialogflow transaction and Open311 POST request in
+    Postgres database, including token associated with POST request that will
+    be attached to a service request number once the request is approved by 
+    the city.
+    '''
+    session_Id = req['sessionId']
     request_time = req['timestamp']
     req_status = req['status']['code']
 
@@ -465,18 +525,34 @@ def  write_to_db(req, token, service_type, request_spec, lat, lng, description,
         with psycopg2.connect(CONNECTION_STRING) as conn2:
             with conn2.cursor() as cur:
 
-                cur.execute(queries.RECORD_TRANSACTION, (session_Id, request_time, 
-                service_type, description, request_spec, address_string, lat, lng, email, 
-                first_name, last_name, phone, post_status, token))
+                cur.execute(queries.RECORD_TRANSACTION,
+                            (session_Id, request_time, service_type, description, 
+                             request_spec, address_string, lat, lng, email, first_name,
+                             last_name, phone, post_status, token))
 
                 conn2.commit()
     except Exception as e:
-        print("transaction recording of session_Id {} failed: {}". format(session_Id, e))
+        print(
+            "transaction recording of session_Id {} failed: {}". format(
+                session_Id, e))
 
 
+def daily_db_update(historicals_list, days_back=1):
+    '''
+    Make GET request to Chicago's Socrata 311 API to get the previous day's
+    updates for pothole, rodent, and single-streetlight-out requests.
 
-def daily_db_update(historicals_list, days_back = 1): 
-    for service_dict in historicals_list:            
+    Inputs:
+        - historicals_list (list of dictionaries): service request type details 
+            including API endpoint, pertinent column names and order for 
+            parsing API request results for pothole, rodent, and streetlight 
+            reqeusts.
+        - days_back (integer): number of days in the past for which to request 
+            updates from the 311 API.
+    '''
+    # iterate over the list of service request detail dictionaries, updating 
+    # each one in the Postgres database
+    for service_dict in historicals_list:
         updated = check_updates(service_dict, days_back)
         clean_updates = dedupe_df(updated, service_dict)
         update_table(clean_updates, service_dict['service_name'])
@@ -484,8 +560,13 @@ def daily_db_update(historicals_list, days_back = 1):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    update_job_id = 'nightly_update_' + datetime.now().isoformat() 
-    sched.add_job(func=daily_db_update, trigger='interval', args=[historicals], minutes=5, id=update_job_id)
+
+    update_job_id = 'nightly_update_' + datetime.now().isoformat()
+    sched.add_job(
+        func=daily_db_update,
+        trigger='interval',
+        args=[historicals],
+        minutes=5,
+        id=update_job_id)
     if not sched.running:
         sched.start()
