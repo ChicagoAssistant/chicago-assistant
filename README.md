@@ -1,9 +1,10 @@
-Team Name: Civic Chifecta
-Project: Chicago 311 Virtual Agent
+## Team Name: Civic Chifecta
+## Project: Chicago 311 Virtual Agent
 
 Our solution can be accessed at http://chicago-311-agent.herokuapp.com/
 
 Our web application is hosted on Heroku via the 'production' branch of our GitHub repository. The python files that are used live by the solution are:
+    
     - server.py: holds main functions used to direct flow of conversation with DialogFlow and submitting requests to Chicago's Open311. Also renders the webpage where our solution is hosted.
 
     - util.py: holds helper functions used in server.py
@@ -44,7 +45,8 @@ Darshan
 11. The virtual agent will ask for feedback using the buttons, and will ask for any additional feedback as an open field. NOTE: feedback is currently not being collected in our databases.
 12. Conversation ends with the agent providing option to go back to the main menu.
 
-## To verify that the request posted to Chicago's Open311 systems, you can pull back requests using the following instructions:
+## Verify that Request Posted to Chicago's Open311 Systems
+Pull back requests using the following instructions:
 1. Open up an ipython instance
 2. Run the following:
     import requests
@@ -52,8 +54,10 @@ Darshan
     requests.get(url).json()
 3. The code above returns a list of dictionaries holding previously submitted requests. You should see your request at the top of the results.
 
-## To verify that the user interaction was logged in our database, you can connect to our database tables using the tool of your choice. We recommend pgAdmin4. You can connect to our database by using the credentials provided in our credentials.txt file in the folder we shared with you.
+## Verify that User Interactions are Logged
+To verify that the user interaction was logged in our database, you can connect to our database tables using the tool of your choice. We recommend pgAdmin4. You can connect to our database by using the credentials provided in our credentials.txt file in the folder we shared with you.
 1. Connect to the database using provided credentials.
 2. View the 'dialogflow_transactions' table to see stored user interactions.
 
-## To see the historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
+## See Historical Request Data
+To see the historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
