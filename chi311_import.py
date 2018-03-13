@@ -5,6 +5,7 @@ import os
 import requests
 import psycopg2
 import pandas as pd
+import queries
 from psycopg2 import sql
 from sodapy import Socrata
 from datetime import datetime, timedelta
@@ -278,77 +279,20 @@ def check_updates(service_dict, days_back = 1):
 update_job_id = 1
 
 def update_table(df, tablename):
-    # take de-duped update dataframe and create temporary table
-    update_temp_table_query = '''
-    CREATE TEMP TABLE tmp_table
-    AS
-    SELECT *
-    FROM {tbl}
-    WITH NO DATA;
-    '''
-    
-
     if tablename == 'streetlights':
-        load_updates_query = '''
-INSERT INTO {tbl} (creation_date, status, completion_date, service_request_number, 
-               type_of_service_request, street_address, zip, x_coordinate, y_coordinate, 
-               ward, police_district, community_area, latitude, longitude, location, response_time)
-SELECT *
-FROM tmp_table
-ON CONFLICT(service_request_number) DO UPDATE
-    SET completion_date = COALESCE(excluded.completion_date, {tbl}.completion_date),
-        status = COALESCE(excluded.status, {tbl}.status),
-        response_time = COALESCE(excluded.response_time, {tbl}.response_time)
-        WHERE (excluded.completion_date IS DISTINCT FROM {tbl}.completion_date) OR
-           (excluded.status IS DISTINCT FROM  {tbl}.status) OR
-           (excluded.response_time IS DISTINCT FROM {tbl}.response_time);'''
-    
+        load_updates_query = queries.UPDATE_STREETLIGHTS
 
     elif tablename == 'potholes': 
-        load_updates_query = '''
-INSERT INTO {tbl} (creation_date, status, completion_date, service_request_number,
-               type_of_service_request, current_activity, most_recent_action,
-               number_of_potholes_filled_on_block, street_address, zip, x_coordinate, y_coordinate,
-               ward, police_district, community_area, ssa, latitude, longitude, location, response_time)
-SELECT *
-FROM tmp_table
-ON CONFLICT(service_request_number) DO UPDATE
-    SET completion_date = COALESCE(excluded.completion_date, {tbl}.completion_date),
-        status = COALESCE(excluded.status, {tbl}.status),
-        current_activity = COALESCE(excluded.current_activity, {tbl}.current_activity),
-        most_recent_action = COALESCE(excluded.most_recent_action, {tbl}.most_recent_action),
-        response_time = COALESCE(excluded.response_time, {tbl}.response_time)
-        WHERE (excluded.completion_date IS DISTINCT FROM {tbl}.completion_date) OR
-           (excluded.status IS DISTINCT FROM  {tbl}.status) OR
-           (excluded.current_activity IS DISTINCT FROM  {tbl}.current_activity) OR
-           (excluded.most_recent_action IS DISTINCT FROM {tbl}.most_recent_action) OR 
-           (excluded.response_time IS DISTINCT FROM {tbl}.response_time);'''
-
-
+        load_updates_query = queries.UPDATE_POTHOLES
 
     elif tablename == 'rodents': 
-        load_updates_query = '''
-INSERT INTO {tbl} (creation_date, status, completion_date, service_request_number, 
-               type_of_service_request, number_of_premises_baited, number_of_premises_with_garbage,
-               number_of_premises_with_rats, current_activity, most_recent_action, street_address, 
-               zip, x_coordinate, y_coordinate, ward, police_district, community_area, latitude, 
-               longitude, location, response_time)
-SELECT *
-FROM tmp_table
-ON CONFLICT(service_request_number) DO UPDATE
-    SET completion_date = COALESCE(excluded.completion_date, {tbl}.completion_date),
-        status = COALESCE(excluded.status, {tbl}.status),
-        current_activity = COALESCE(excluded.current_activity, {tbl}.current_activity),
-        most_recent_action = COALESCE(excluded.most_recent_action, {tbl}.most_recent_action),
-        response_time = COALESCE(excluded.response_time, {tbl}.response_time)
-        WHERE (excluded.completion_date IS DISTINCT FROM {tbl}.completion_date) OR
-           (excluded.status IS DISTINCT FROM  {tbl}.status) OR
-           (excluded.current_activity IS DISTINCT FROM  {tbl}.current_activity) OR
-           (excluded.most_recent_action IS DISTINCT FROM {tbl}.most_recent_action) OR 
-           (excluded.response_time IS DISTINCT FROM {tbl}.response_time);'''
+        load_updates_query = queries.UPDATE_RODENTS
 
-    
-    temp_table_q = sql.SQL(update_temp_table_query).format(tbl=sql.Identifier(tablename))
+    # create temporary tuple into which to load de-duped update dataframe data
+    temp_table_q = sql.SQL(queries.CREATE_TEMP).format(tbl=sql.Identifier(tablename))
+
+    # insert and/ or update temporary table data into exisiting data table for 
+    # specified service type
     load_table_q = sql.SQL(load_updates_query).format(tbl=sql.Identifier(tablename))
 
     try:

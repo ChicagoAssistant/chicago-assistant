@@ -191,18 +191,10 @@ def post_request(req):
     last_name = parameters['last-name']
     lat, lng, address_string = geocode(req, GMAPS)
 
-    post_data = structure_post_data(
-        service_code,
-        attribute,
-        lat,
-        lng,
-        description,
-        address_string,
-        email,
-        first_name,
-        last_name,
-        phone,
-        OPEN_311_APPTOKEN)
+    post_data = structure_post_data(service_code, attribute, lat, lng, 
+                                    description, address_string, email,
+                                    first_name, last_name, phone,
+                                    OPEN_311_APPTOKEN)
 
     response = requests.post(url, data = post_data)
 
@@ -214,20 +206,8 @@ def post_request(req):
     status_code = response.status_code
     status_message = generate_post_status_message(status_code)
 
-    write_to_db(
-        req,
-        token,
-        service_type,
-        request_spec,
-        lat,
-        lng,
-        description,
-        address_string,
-        status_code,
-        email,
-        first_name,
-        last_name,
-        phone)
+    write_to_db(req, token, service_type, request_spec, lat, lng, description,
+                address_string, status_code, email, first_name, last_name, phone)
 
     return status_message
 
@@ -361,10 +341,16 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
             with conn2.cursor() as cur:
 
                 cur.execute(queries.RECORD_TRANSACTION,
+<<<<<<< HEAD
                             (session_Id, request_time, service_type, 
                              description, request_spec, address_string, lat,
                              lng, email, first_name, last_name, phone, 
                              post_status, token))
+=======
+                            (session_Id, request_time, service_type, description, 
+                             request_spec, address_string, lat, lng, email, 
+                             first_name, last_name, phone, post_status, token))
+>>>>>>> e28ed5e9a65f5e79a53bad4aee32eeb1c592161f
 
                 conn2.commit()
     except Exception as e:
