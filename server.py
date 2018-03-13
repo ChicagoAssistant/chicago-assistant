@@ -65,7 +65,7 @@ def render_page():
 def makeWebhookResult(req):
     '''
     Takes a request from DialogFlow webhook and triages what the request
-    is to produce the appropriate response.
+    is to produce the appropriate response back to DialogFlow.
     Inputs:
         - req (json): information passed from DialogFlow webhook
     '''
@@ -87,7 +87,8 @@ def makeWebhookResult(req):
         data = {"completion_time": completion_message,
                 "post_status": status_message}
 
-        return followupEvent('completion_time', data)
+        return followupEvent('completion_time', data) #Triggers confirmation
+                                                      #message to the user.
 
 
 def followupEvent(event_key, data=None):
@@ -128,7 +129,7 @@ def followupEvent(event_key, data=None):
 
 def process_address(req, corrected = False):
     '''
-    Manages collection of viable address. If an adequate address is given
+    Manages collection of viable address. If a viable address is given
     (i.e. a single match is found via google maps autocomplete), then
     the conversation continues. If there aren't any matches, then the
     conversation will direct the user to enter the address again. In the case
