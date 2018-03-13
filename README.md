@@ -69,3 +69,9 @@ To verify that the user interaction was logged in our database, you can connect 
 
 ### See Historical Request Data
 To see historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
+
+## Data Sources
+
+**Historical Chicago 311 Request Data:** We used data from Chicago's Open Data Portal, specifically pothole, rodent baiting, and street light requests from the last 4 years.
+
+**Training Phrase Data From Multiple Cities:** In order to train our agent, we explored and used raw text data from Cincinnati, Baton Rouge, Gainesville, Kansas City, New Orleans, and Chicago.
