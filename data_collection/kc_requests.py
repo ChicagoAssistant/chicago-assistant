@@ -35,6 +35,9 @@ def import_kc(kc_url):
 
         # create dataframe
         kc_requests = pd.DataFrame(kc_reqs[1:], columns = kc_reqs[0])
+        
+        # drop records unrelated to service request types in question and 
+        # unnecessary columns
         kc_requests = kc_requests[kc_requests["REQUEST TYPE"].str.lower().str.contains(" rat|rodent|mouse| pot | hole |pothole|potholes|street light|streetlight|light out")]
         kc_requests = kc_requests[kc_cols_to_keep]
         
@@ -235,7 +238,7 @@ def is_url_ok_to_follow(url, limiting_domain):
     return (ext == "" or ext == ".cfm")
 
 
-def go():
+def get_kc(kc_link):
     '''
     Crawl Kansas City URLs and generate a pandas dataframe of service request
     details.
@@ -243,7 +246,7 @@ def go():
     Outputs: (dataframe) a pandas dataframe of 311 service request details
              including raw text comments
     '''
-    kc_df = import_kc(KC_URL)
+    kc_df = import_kc(kc_link)
     max_pages = kc_df.shape[0]
 
     # initialize queue to hold links to scrape
@@ -268,12 +271,10 @@ def go():
             pages_visited += 1
             pull_comments(case_soup, kc_df)
 
-    print("{}: formatting...".format(datetime.now()))
     kc_df.dropna(axis = 0, how = 'any', subset = ["COMMENT_TEXT"], inplace = True)
     
-    # drop records unrelated to service request types in question
-    kc_df = kc_df[kc_df["COMMENT_TEXT"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
     kc_df = kc_df[["REQUEST TYPE", "COMMENTS"]]
+    kc_df.columns = ['service_type', 'description']
 
     return kc_df
 
@@ -294,12 +295,8 @@ def chicago_df(chi_csv):
     chi = pd.read_excel(chi_csv, sheet_name=0) 
     chi2 = pd.read_excel(chi_csv, sheet_name=1)
     chi = chi.append(chi2)
-    chi = chi[chi["Comments"].str.contains("rat | mouse | pot | hole | pothole | potholes | light | streetlight | streetlights")]
     chi = chi[['SR Type Description', 'Comments']]
+    chi.columns = ['service_type', 'description']
 
     return chi
 
-
-if __name__ == "__main__":
-    go()
-    chicago_df('Open311SRs.xls')
