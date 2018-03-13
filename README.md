@@ -1,5 +1,5 @@
 ## Team Name: Civic Chifecta
-## Project: Chicago 311 Virtual Agent
+### Project: Chicago 311 Virtual Agent
 
 Our solution can be accessed at http://chicago-311-agent.herokuapp.com/
 
