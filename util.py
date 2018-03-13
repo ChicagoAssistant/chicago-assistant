@@ -5,6 +5,7 @@ def geocode(req, client):
 
     Inputs:
         - address (string): address of service request given by user
+        - client (class) Google Maps client instantiated with API key
     Outputs:
         - lat (float): latitude of address as given by google maps
         - lng (float): longitude of address as given by google maps
@@ -48,7 +49,6 @@ def get_action(req):
         - action (string) action from DialogFlow which determines proceeding
           action.
     '''
-    # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
     try:
         action = req['result']['action']
         return action
@@ -99,7 +99,9 @@ def get_service_code(service_type):
         - service_type (string): service type generated in DialogueFlow
             based on user input
     Outputs:
-        - service_code (string): Open311 service code for service request
+        - service_code (string): Open311 service code for post service 
+            request to Open311 systems 
+            See http://dev.cityofchicago.org/docs/open311/
     '''
     service_types = {'pothole': '4fd3b656e750846c53000004',
                      'rodent': '4fd3b9bce750846c5300004a',
@@ -111,6 +113,11 @@ def get_service_code(service_type):
 def generate_post_status_message(status_code):
     '''
     Helper function to return status message given a status code.
+    Inputs:
+        - status_code (int) status code returned by post request to Open311
+    Outputs:
+        - status_message (string) status message indicating status of post
+            request
     '''
     status_messages = {201: 'Your request has been submitted successfully!',
                        400: 'Your request is a duplicate in our system!'}
@@ -143,6 +150,12 @@ def structure_post_data(service_code, attribute, lat, lng, description,
 def generate_attribute(service_type, request_spec):
     '''
     Helper function to create dictionary needed for the Open311 post request.
+    Inputs:
+        - service_type (string): service request type
+        - request_spec (string): answer to request specific question
+    Outputs:
+        - attribute (dict): dictionary sent to Open311 as attribute to specify
+            answer to required question. See http://dev.cityofchicago.org/docs/open311/
     '''
     attributes = {
         'pothole':
@@ -165,6 +178,10 @@ def get_tablename(db_key):
     '''
     Return name of associated Postgres database table from Open311/ 
     Dialogflow service request type names
+    Inputs:
+        - db_key (string) key to match to the appropriate tablename
+    Outputs:
+        - tablename (string) table name where historical data is stored
     '''
     db_map = {'pothole': 'potholes', 'rodent': 'rodents',
               'street light': 'streetlights',

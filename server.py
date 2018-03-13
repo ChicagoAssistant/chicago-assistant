@@ -10,8 +10,9 @@ from flask import render_template
 import googlemaps
 import requests
 from clock import sched
-from util import (filter_city, get_action, get_service_code, get_service_type, 
-                   get_address_recs, get_tablename, generate_post_status_message, 
+from util import (filter_city, get_action, get_service_code, get_service_type,
+                   get_address_recs, get_tablename, 
+                   generate_post_status_message,
                    generate_attribute, structure_post_data, geocode)
 from chi311_import import historicals, check_updates, dedupe_df, update_table
 import queries
@@ -29,8 +30,10 @@ PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
 SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-CONNECTION_STRING = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(
-    NAME, USER, HOST, PORT, PW, SSL_PATH)
+CONNECTION_STRING = """dbname='{}' user='{}' host='{}' port='{}' 
+                        password='{}' sslmode='verify-full' 
+                        sslrootcert='{}'""".format(
+                        NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
 @app.route('/webhook', methods=['POST'])
@@ -53,7 +56,7 @@ def webhook():
 
 
 @app.route('/')
-def test():
+def render_page():
     return render_template('page.html')
 
 
@@ -74,8 +77,8 @@ def makeWebhookResult(req):
     if action == 'address.corrected':
         return process_address(req, True) 
 
-    if action == 'request.complete': #Triggers post of request and average number
-        #of days to complete request
+    if action == 'request.complete': #Triggers post of request and average
+        #number of days to complete request
         status_message = post_request(req)
         completion_message = request_triggered_query(req)
 
@@ -129,6 +132,7 @@ def process_address(req, corrected = False):
     Inputs:
         - req (dict) data from DialogFlow where the address given by the
             user is stored
+        - corrected (boolean) True if used to process a corrected address
     Outputs:
         - followupEvent action: depending on the quality of the address
             provided by the user, this funciton will steer the conversation
@@ -160,9 +164,10 @@ def process_address(req, corrected = False):
 
 def post_request(req):
     '''
-    Extracts all required data from DialogFlow post request containing
+    Extracts all required data from DialogFlow request containing
     all user inputs, structures the data into a dictionary which can
-    then be passed as a post request to the Chicago Open311 environment.
+    then be passed as a post request to the Chicago Open311 test system.
+    Will also update our own datebase recording user interactions.
 
     Inputs:
         - req (json): information passed from DialogFlow webhook containing
@@ -209,15 +214,14 @@ def post_request(req):
 
 def request_triggered_query(req):
     '''
-    Given a user's location and the type of request, query average historical
-    resolution time for the two weeks pre- and post- today's day/ month in the 
-    last four years for the type of request. Limit query to the neighborhood 
-    containing reported location according to Chicago Open Data Portal 
-    Neighborhood Boundaries. 
+    Query average historical resolution time for the two weeks pre- and post- 
+    today's day/ month in the last four years for the type of request. 
+    Limit query to the neighborhood containing reported location according 
+    to Chicago Open Data Portal Neighborhood Boundaries. 
 
     Inputs:
-        -req (request): request containing information from DialogFlow including
-            service type and query parameters 
+        -req (request): request containing information from DialogFlow 
+            including service type and query parameters 
 
     Output: 
         - completion_message (str): formatted message indicating historical
@@ -244,8 +248,8 @@ def request_triggered_query(req):
     unit_index = {0: 'months', 1: 'weeks', 2: 'days'}
 
     # if there is no information on the specific neighborhood at the given time
-    # of year, check for that neighborhood only; check for that time only if there
-    # are no results for the given neighborhood
+    # of year, check for that neighborhood only; check for that time only if 
+    # there are no results for the given neighborhood
     if res and all(v is None for v in res):
         loc_only = True
 
@@ -256,7 +260,8 @@ def request_triggered_query(req):
 
         if res and all(v is None for v in res):
             loc_only = False
-            time_q = sql.SQL(queries.TIME_ONLY).format(tbl=sql.Identifier(tablename))
+            time_q = sql.SQL(queries.TIME_ONLY).format(
+                                                tbl=sql.Identifier(tablename))
             cur.execute(time_q)
             res = cur.fetchone()
             print(res)
@@ -264,7 +269,7 @@ def request_triggered_query(req):
     cur.close()
     conn2.close()
 
-    # for time-only results, there will only be three entries in the response 
+    # for time-only results, there will only be three entries in the response
     # tuple (res)
     if res and len(res) == 3:
         for i, num in enumerate(res):
@@ -295,7 +300,7 @@ def request_triggered_query(req):
                                                  tablename, neighb, num, unit)
                 return completion_message
 
-    # if no results returned, proceed with default message.
+    # if no results returned, proceed with default message
     if not res:
         completion_message = '''Thank you for your {} request! 
                                 If you provided your contact 
@@ -312,6 +317,20 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
     Postgres database, including token associated with POST request that will
     be attached to a service request number once the request is approved by 
     the city.
+    Inputs:
+        -req (json) request containing all user input information
+        -token (string) token generated as response from Open311
+        -service_type (string) service type of the request
+        -request_spec (string) request specific information
+        -lat (float) latitude of service request
+        -lng (float) longitude of service request
+        -description (string) description given by user
+        -address_string (string) address of service request
+        -post_status (string) status of post request from Open311
+        -email (string) email of user, if given
+        -first_name (string) user first name, if given
+        -last_name (string) user last name, if given
+        -phone (string) user phone number, if given
     '''
     session_Id = req['sessionId']
     request_time = req['timestamp']
@@ -322,9 +341,10 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
             with conn2.cursor() as cur:
 
                 cur.execute(queries.RECORD_TRANSACTION,
-                            (session_Id, request_time, service_type, description, 
-                             request_spec, address_string, lat, lng, email, 
-                             first_name, last_name, phone, post_status, token))
+                            (session_Id, request_time, service_type, 
+                             description, request_spec, address_string, lat,
+                             lng, email, first_name, last_name, phone, 
+                             post_status, token))
 
                 conn2.commit()
     except Exception as e:
@@ -333,7 +353,7 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
                 session_Id, e))
 
 
-def daily_db_update(historicals_list, days_back=1):
+def daily_db_update(historicals_list, days_back = 1):
     '''
     Make GET request to Chicago's Socrata 311 API to get the previous day's
     updates for pothole, rodent, and single-streetlight-out requests; remove
@@ -341,7 +361,7 @@ def daily_db_update(historicals_list, days_back=1):
     service request type 
 
     Inputs:
-        - historicals_list (list of dictionaries): service request type details 
+        - historicals_list (list of dictionaries): service request type details
             including API endpoint, pertinent column names and order for 
             parsing API request results for pothole, rodent, and streetlight 
             reqeusts.
