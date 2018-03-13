@@ -318,19 +318,19 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
     be attached to a service request number once the request is approved by 
     the city.
     Inputs:
-        -req (json) request containing all user input information
-        -token (string) token generated as response from Open311
-        -service_type (string) service type of the request
-        -request_spec (string) request specific information
-        -lat (float) latitude of service request
-        -lng (float) longitude of service request
-        -description (string) description given by user
-        -address_string (string) address of service request
-        -post_status (string) status of post request from Open311
-        -email (string) email of user, if given
-        -first_name (string) user first name, if given
-        -last_name (string) user last name, if given
-        -phone (string) user phone number, if given
+        - req (json) request containing all user input information
+        - token (string) token generated as response from Open311
+        - service_type (string) service type of the request
+        - request_spec (string) request specific information
+        - lat (float) latitude of service request
+        - lng (float) longitude of service request
+        - description (string) description given by user
+        - address_string (string) address of service request
+        - post_status (string) status of post request from Open311
+        - email (string) email of user, if given
+        - first_name (string) user first name, if given
+        - last_name (string) user last name, if given
+        - phone (string) user phone number, if given
     '''
     session_Id = req['sessionId']
     request_time = req['timestamp']

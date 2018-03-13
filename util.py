@@ -131,6 +131,20 @@ def structure_post_data(service_code, attribute, lat, lng, description,
     '''
     Helper function to structure all user inputs into appropriate
     dictionary format that will be passed to Open311 systems.
+    Inputs:
+        - service_type (string) service type of the request
+        - attribute (dict) request specific information
+        - lat (float) latitude of service request
+        - lng (float) longitude of service request
+        - description (string) description given by user
+        - address_string (string) address of service request
+        - email (string) email of user, if given
+        - first_name (string) user first name, if given
+        - last_name (string) user last name, if given
+        - phone (string) user phone number, if given
+        - api_key (string) API Key for Open311 system
+    Outpots:
+        - post_data (dict) data pushed to Open311 system
     '''
     post_data = {'service_code': service_code,
                  'attribute': attribute,
