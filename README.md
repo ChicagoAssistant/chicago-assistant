@@ -62,4 +62,4 @@ To verify that the user interaction was logged in our database, you can connect 
 2. View the 'dialogflow_transactions' table to see stored user interactions.
 
 ### See Historical Request Data
-To see the historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
+To see historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
