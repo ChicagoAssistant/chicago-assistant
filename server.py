@@ -356,7 +356,9 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
 def daily_db_update(historicals_list, days_back = 1):
     '''
     Make GET request to Chicago's Socrata 311 API to get the previous day's
-    updates for pothole, rodent, and single-streetlight-out requests.
+    updates for pothole, rodent, and single-streetlight-out requests; remove
+    duplicates, and insert into Postgres database table corresponding to each
+    service request type 
 
     Inputs:
         - historicals_list (list of dictionaries): service request type details

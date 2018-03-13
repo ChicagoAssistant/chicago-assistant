@@ -23,7 +23,6 @@ APP_TOKEN = os.environ['SODAPY_APPTOKEN']
 SSL_DIR = os.path.dirname(__file__)
 SSL_PATH = os.path.join(SSL_DIR, SSL)
 
-
 psycopg2_connection_string = "dbname='{}' user='{}' host='{}' port='{}' password='{}' sslmode='verify-full' sslrootcert='{}'".format(NAME, USER, HOST, PORT, PW, SSL_PATH)
 
 
@@ -112,17 +111,13 @@ historicals = [{'service_name':'potholes',
                 'endpoint': 'h555-t6kz'}
                 ]
 
-    #     # note for streetlight, location is a text field rather than point, so
-    #     # within_circle cannot be used
-    #  
-
 
 def convert_dates(date_series):
-    """
+    '''
     Faster approach to datetime parsing for large datasets leveraging repated dates.
 
-    Source: https://github.com/sanand0/benchmarks/commit/0baf65b290b10016e6c5118f6c4055b0c45be2b0
-    """
+    Attribution: https://github.com/sanand0/benchmarks/commit/0baf65b290b10016e6c5118f6c4055b0c45be2b0
+    '''
     dates = {date:pd.to_datetime(date) for date in date_series.unique()}
     return date_series.map(dates)
 
@@ -132,6 +127,14 @@ def build_initial_tables(historicals):
     Create databases for each of the 311 services stored as keys in a given
     dictionary, each of which is a dictionary indicating a related CSV URL and 
     column names.
+
+    Inputs:
+        - historicals_list (list of dictionaries): service request type details 
+            including API endpoint, pertinent column names and order for 
+            parsing API request results for pothole, rodent, and streetlight 
+            reqeusts.
+    Outputs:
+        - intial_records (dataframe): pandas dataframe of historical 311 data
     '''
     initial_records = []
 
@@ -142,26 +145,18 @@ def build_initial_tables(historicals):
 
             if r.status_code == 200:
                 decoded_dl = r.content.decode('utf-8')
-                print("decoded")
                 req_reader = csv.reader(decoded_dl.splitlines(), delimiter = ',')
-                print("read")
                 read_info = list(req_reader)
-                print("listed")
-                historicals_df = pd.DataFrame(read_info[1:], columns = read_info[0])
-                print("made dataframe")
                 
+                historicals_df = pd.DataFrame(read_info[1:], columns = read_info[0])
                 historicals_df.rename(columns = service_dict['clean_cols'], inplace=True)
-                print("renamed")
 
                 historicals_df['creation_date'] = convert_dates(historicals_df['creation_date'])
                 historicals_df['completion_date'] = convert_dates(historicals_df['completion_date'])
-                print("converted dates")
 
-                historicals_df['response_time'] = historicals_df['completion_date'] - historicals_df['creation_date']
-                
+                historicals_df['response_time'] = historicals_df['completion_date'] - historicals_df['creation_date']                
                 
                 initial_records.append(historicals_df)
-                print("done, {:,} records".format(historicals_df.shape[0]))
 
         except:
             print("{}: Could not retrive CSV for {}".format(r.status_code, service_dict['service_name']))
@@ -171,6 +166,22 @@ def build_initial_tables(historicals):
 
 
 def dedupe_df(df, service_dict):
+    '''
+    Parse dataframe of  311 service request data for a given service request 
+    type, removing duplicate service request records (multiple records for same 
+    service request number) based on "current activity" column value or 
+    completion date
+
+    Inputs:
+        - df (database): Database of 311 request records
+        - service_dict (dictionary): service request type details including
+            API endpoint, pertinent column names and order for parsing API 
+            request results for pothole, rodent, or streetlight reqeusts
+    
+    Outputs:
+        - clean_df (dataframe): pandas dataframe of 311 data without duplicate 
+            service request numbers
+    '''
     dupes = df[df.duplicated(subset = 'service_request_number', keep = False)]
     print("Found {} request numbers with duplicates.".format(len(dupes['service_request_number'].unique())))
     df.drop_duplicates(subset = 'service_request_number', keep = False, inplace = True)
@@ -183,7 +194,8 @@ def dedupe_df(df, service_dict):
         focus = dupes[dupes['service_request_number'] == duplicate]
 
         if not final_trigger:    
-            # focus['completion_date'] = pd.to_datetime(x['completion_date'])
+            # if none of the duplicate entries are noted as final steps, 
+            # use most recent completion date
             most_recent = focus['completion_date'].idxmax()
             keep_list.append(most_recent)
 
@@ -196,13 +208,10 @@ def dedupe_df(df, service_dict):
                 keep_list.append(final_outcome)
 
             elif final.shape[0] > 1:
-                # final['completion_date'] = pd.to_datetime(x['completion_date'])
                 most_recent = final['completion_date'].idxmax()
                 keep_list.append(most_recent)
 
             elif final.shape[0] == 0:
-                # if none of the duplicate entries are noted as final steps
-                # focus['completion_date'] = pd.to_datetime(x['completion_date'])
                 most_recent = focus['completion_date'].idxmax()
                 keep_list.append(most_recent)
 
@@ -214,6 +223,17 @@ def dedupe_df(df, service_dict):
 
 
 def check_updates(service_dict, days_back = 1):
+    '''
+    Make GET request to Chicago's Socrata 311 API to get updates for
+    pothole, rodent, and single-streetlight-out requests
+    
+    Inputs:
+        - service_dict (dictionary): service request type details including
+            API endpoint, pertinent column names and order for parsing API 
+            request results for pothole, rodent, or streetlight reqeusts
+        - days_back (integer): number of days in the past for which to request 
+            updates from 311 API
+    '''
     period = datetime.now() - timedelta(days = days_back)
     period = period.date().isoformat() 
     offset_amt = 2000
@@ -244,7 +264,6 @@ def check_updates(service_dict, days_back = 1):
             print("Unsuccessful GET request.")
         else:
             newly_updated = pd.DataFrame(new_updates.json())
-            # print(newly_updated[:5])
             
             if pulls > 1:
                 
@@ -261,24 +280,30 @@ def check_updates(service_dict, days_back = 1):
 
                 newly_updated = pd.concat(update_list, ignore_index = True)
             
-            # ADD TEST FOR UNEXPECTED NAMES HERE
             print(newly_updated.columns)
             print()
             
-            # newly_updated.rename(columns = service_dict['clean_cols'], inplace=True)
             ordered_updates = newly_updated.reindex(columns = service_dict['order'])
             print(ordered_updates.columns)
 
-            # print(newly_updated[:5])
             ordered_updates['creation_date'] = convert_dates(ordered_updates['creation_date'])
             ordered_updates['completion_date'] = convert_dates(ordered_updates['completion_date'])
             ordered_updates['response_time'] = ordered_updates['completion_date'] - ordered_updates['creation_date']
 
             return ordered_updates
 
-update_job_id = 1
+
 
 def update_table(df, tablename):
+    '''
+    Insert newly updated records retrieved from API GET request into Postgres 
+    database
+
+    Inputs:
+        - df (database): Database of updated records from Socrata API
+        - tablename (string): name of table in Postrgres database into which 
+            updates will be inserted
+    '''
     if tablename == 'streetlights':
         load_updates_query = queries.UPDATE_STREETLIGHTS
 
