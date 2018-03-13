@@ -9,16 +9,20 @@ Our web application is hosted on Heroku via the 'production' branch of our GitHu
 
     - util.py: holds helper functions used in server.py
 
-    - chi311_import.py: holds code used to create initial tables and manage daily table updates
+    - chi311_import.py: holds code used to import historical 311 data and manage Postgres database table updates
 
-    - queries.py: holds queries that are used to query the average historical time for request fulfilment
+    - queries.py: holds queries that are used to determine the average historical time for request fulfillment, and to create and update tables
 
-Code that was used to gather 311 data from other cities can be found in the 'data_collection' folder in our repository.
+	- db_interactions: holds code used to create initial tables
+
+    - page.html: holds Bootstrap and customized HTML for app webpage
+
+Code that was used to gather 311 raw text data from other cities for training can be found in the 'data_collection' folder in our repository.
 
 ### Description of Code Structure: 
-- Our code is used eachtime DialogFlow sends a webhook request to our web application. For an example of the data that is passed to our web application, see an example here: https://github.com/civicchifecta/311-agent/blob/master/example_dialogflow_request.json Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
-    1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addressess are matched, then our web application passes back up to three recommended addresses to select from.
-    2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the reqeust to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times in addition to recording the user interaction in our databases.
+- Our code is used each time DialogFlow sends a webhook request to our web application. For an example of the data that is passed to our web application, see an example here: https://github.com/civicchifecta/311-agent/blob/master/example_dialogflow_request.json Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
+    1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addresses are matched, then our web application passes back up to three recommended addresses to select from.
+    2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the request to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times in addition to recording the user interaction in our databases.
     3. There are several points in the conversation that our web application is used to direct the flow of conversation - this can be seen in the "makeWebhookRequest" function. The different actions shown in the followupEvent function correspond to an "Intent" in DialogFlow triggered by the followup event (see https://dialogflow.com/docs/events for more info).
 
 NOTE: The flow of conversation, natural language processing, and integration with Skype are all completed within the DialogFlow platform. Areas of interest within DialogFlow are the "Intents" section and the "Entities". You can access DialogFlow at http://www.dialogflow.com
@@ -26,7 +30,7 @@ NOTE: The flow of conversation, natural language processing, and integration wit
 
 ### Team member contributions:
 
-Loren
+Loren was responsible for compiling historical 311 service request data from the city of Chicago open data portal into a Postgres database that could be queried for sservice request resolution time, including initializing the PostGIS extension with shapefiles corresponding to Chicago neighborhood boundaries from the Chicago Open Data Portal so the virtual agent could give location-specific responses. She also wrote code to request newly updated service request records from Chicago's Socrata 311 APIs for pothole (https://dev.socrata.com/foundry/data.cityofchicago.org/787j-mys9), single streetlight out (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Street-Lights-One-Out/3aav-uy2v), and rodent baiting (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Rodent-Baiting/97t6-zrhs) service requests. Loren wrote the code for for gathering and organizing historical 311 request data from non-Chicago cities for parsing in order to gather training phrases for DialogFlow and customized the main website page using Bootstrap.
 
 Darshan
 

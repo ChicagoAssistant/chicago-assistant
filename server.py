@@ -316,6 +316,7 @@ def request_triggered_query(req):
         return completion_message
 
 
+
 def write_to_db(req, token, service_type, request_spec, lat, lng, description,
                 address_string, post_status, email=None, first_name=None,
                 last_name=None, phone=None):
@@ -389,9 +390,11 @@ if __name__ == '__main__':
     update_job_id = 'nightly_update_' + datetime.now().isoformat()
     sched.add_job(
         func=daily_db_update,
-        trigger='interval',
-        args=[historicals],
-        minutes=5,
-        id=update_job_id)
+        trigger='cron', 
+        id=update_job_id, 
+        day_of_week='0-6', 
+        hour=10, minute=12, 
+        args=[historicals], 
+        jitter=30)
     if not sched.running:
         sched.start()
