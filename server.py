@@ -1,3 +1,8 @@
+#                     Documentation of Code Ownership  
+# Original code or heavily modified given structure unless otherwise noted in 
+# function header.  
+
+
 import urllib
 import json
 import os

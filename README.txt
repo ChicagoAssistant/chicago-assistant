@@ -1,4 +1,5 @@
-
+Team Name: Civic Chifecta
+Project: Chicago 311 Virtual Agent
 
 Our solution can be accessed at http://chicago-311-agent.herokuapp.com/
 
@@ -16,7 +17,7 @@ Code that was used to gather 311 data from other cities can be found in the 'dat
 Decription of Code Structure: 
 - Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
     1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addressess are matched, then our web application passes back up to three recommended addresses to select from.
-    2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the reqeust to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times.
+    2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the reqeust to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times in addition to recording the user interaction in our databases.
     3. There are several points in the conversation that our web application is used to direct the flow of conversation - this can be seen in the "makeWebhookRequest" function. The different actions shown in the followupEvent function correspond to an "Intent" in DialogFlow triggered by the followup event (see https://dialogflow.com/docs/events for more info).
 
 
@@ -37,8 +38,8 @@ Instructions for trying the solution and verifying successful trial:
 5. Provide an address, cross street, or establishment name. If more than one match is returned by Google Maps Autocomplete, the top three matches will be returned to the messaging interface for the user to select from.
 6. A service-type-specific question will be asked by the virtual agent (example: for potholes, the virtual agent asks if the pothole is in the intersection, curb lane, bike lane, crosswalk, or traffic lane). If the same question is asked again, it means that the virtual agent was unable to match your response to any of the five options listed above.
 7. Provide a description, any description text would do.
-8. The agent will ask if you'd like to be notified - here you have the option of providing a phone and email. To skip, press "Skip" or reject in a negatory experession of your choice.
-9. At this point, our solution will push the request to Chicago's Open311 system and will query our databases to get an average time of completion for the given service request type.
+8. The agent will ask if you'd like to be notified - here you have the option of providing a phone and email. To skip, press "No, thank you." or reject in a negatory experession of your choice.
+9. At this point, our solution will structure and push the request to Chicago's Open311 system and will query our databases to get an average time of completion for the given service request type.
 10. Successful completion of these two tasks are indicated by "Your request has been submitted successfully!" OR "Your request is a duplicate in our system!" and "Requests for _ in the _ area are typically serviced within _ days at this time of year.", respectively.
 11. The virtual agent will ask for feedback using the buttons, and will ask for any additional feedback as an open field. NOTE: feedback is currently not being collected in our databases.
 12. Conversation ends with the agent providing option to go back to the main menu.
