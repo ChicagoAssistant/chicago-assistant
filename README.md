@@ -49,10 +49,12 @@ Darshan
 Pull back requests using the following instructions:
 1. Open up an ipython instance
 2. Run the following:
-    
+
+    ```
     import requests
     url = 'http://test311api.cityofchicago.org/open311/v2/requests.json'
     requests.get(url).json()
+    ```
 
 3. The code above returns a list of dictionaries holding previously submitted requests. You should see your request at the top of the results.
 
