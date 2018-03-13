@@ -1,8 +1,5 @@
 import googlemaps
 
-def geo(address, client):
-    return client.geocode(address)
-
 def geocode(req, client):
     '''
     Function that will geocode an address and return lat, long, and
@@ -124,7 +121,8 @@ def generate_post_status_message(status_code):
 
 
 def structure_post_data(service_code, attribute, lat, lng, description,
-                        address_string, email, first_name, last_name, phone):
+                        address_string, email, first_name, last_name, phone,
+                        api_key):
     '''
     Helper function to structure all user inputs into appropriate
     dictionary format that will be passed to Open311 systems.
@@ -139,7 +137,7 @@ def structure_post_data(service_code, attribute, lat, lng, description,
                  'address_string': address_string,
                  'phone_number': phone,
                  'description': description,
-                 'api_key': OPEN_311_APPTOKEN}
+                 'api_key': api_key}
 
     return post_data
 
