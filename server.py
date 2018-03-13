@@ -3,10 +3,7 @@ import json
 import os
 import psycopg2
 from psycopg2 import sql
-from flask import Flask
-from flask import request
-from flask import make_response
-from flask import render_template
+from flask import Flask, request, make_response, render_template
 import googlemaps
 import requests
 from clock import sched
@@ -72,10 +69,10 @@ def makeWebhookResult(req):
         return followupEvent('get_address') #Triggers question to get address
 
     if action == 'get.address':
-        return process_address(req)
+        return process_address(req) #Checks address provided by user
 
     if action == 'address.corrected':
-        return process_address(req, True) 
+        return process_address(req, True) #Checks corrected address
 
     if action == 'request.complete': #Triggers post of request and average
         #number of days to complete request
@@ -94,7 +91,11 @@ def followupEvent(event_key, data=None):
     based on where the conversation needs to go next. The 'events'
     below specify one of any events that are triggered in the
     conversation. This function simply constructs the appropriate
-    event response for DialogFlow.
+    event response for DialogFlow. DialogFlow uses the response
+    to know which "Intent" to trigger next. If data is passed
+    as part of the response, DialogFlow can use that data to
+    insert into its response to the user. For more info, see
+    https://dialogflow.com/docs/events.
 
     Inputs:
         - event_key (string): event key that will be used to map

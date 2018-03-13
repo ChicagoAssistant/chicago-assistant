@@ -11,9 +11,17 @@ Our web application is hosted on Heroku via the 'production' branch of our GitHu
 
     - queries.py: holds queries that are used to query the average historical time for request fulfilment
 
+Code that was used to gather 311 data from other cities can be found in the 'data_collection' folder in our repository.
+
+Decription of Code Structure: 
+- Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
+    1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addressess are matched, then our web application passes back up to three recommended addresses to select from.
+    2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the reqeust to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times.
+    3. There are several points in the conversation that our web application is used to direct the flow of conversation - this can be seen in the "makeWebhookRequest" function. The different actions shown in the followupEvent function correspond to an "Intent" in DialogFlow triggered by the followup event (see https://dialogflow.com/docs/events for more info).
+
 
 Team member contributions:
-Vidal was responsible for designing the flow of dialogue in DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
+Vidal was responsible for implementing the flow of dialogue into DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
 
 Loren
 
@@ -31,7 +39,7 @@ Instructions for trying the solution and verifying successful trial:
 7. Provide a description, any description text would do.
 8. The agent will ask if you'd like to be notified - here you have the option of providing a phone and email. To skip, press "Skip" or reject in a negatory experession of your choice.
 9. At this point, our solution will push the request to Chicago's Open311 system and will query our databases to get an average time of completion for the given service request type.
-10. Successful completion of these two tasks are indicated by "Your request has been submitted successfully" OR "Your request is a duplicate in our system!" and "Requests for _ in the _ area are typically serviced within _ days at this time of year.", respectively.
+10. Successful completion of these two tasks are indicated by "Your request has been submitted successfully!" OR "Your request is a duplicate in our system!" and "Requests for _ in the _ area are typically serviced within _ days at this time of year.", respectively.
 11. The virtual agent will ask for feedback using the buttons, and will ask for any additional feedback as an open field. NOTE: feedback is currently not being collected in our databases.
 12. Conversation ends with the agent providing option to go back to the main menu.
 
