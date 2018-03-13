@@ -1,1 +1,50 @@
-read
+
+
+Our solution can be accessed at http://chicago-311-agent.herokuapp.com/
+
+Our web application is hosted on Heroku via the 'production' branch of our GitHub repository. The python files that are used live by the solution are:
+    - server.py: holds main functions used to direct flow of conversation with DialogFlow and submitting requests to Chicago's Open311. Also renders the webpage where our solution is hosted.
+
+    - util.py: holds helper functions used in server.py
+
+    - chi311_import.py: holds code used to create initial tables and manage daily table updates
+
+    - queries.py: holds queries that are used to query the average historical time for request fulfilment
+
+
+Team member contributions:
+Vidal was responsible for designing the flow of dialogue in DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
+
+Loren
+
+Darshan
+
+
+Instructions for trying the solution and verifying successful trial:
+
+1. Go to http://chicago-311-agent.herokuapp.com/
+2. Initiate conversation with a greeting of your choice.
+3. Indicate in your own words the type of request you'd like to submit, or use one of the buttons.
+4. Opt to give a name or skip.
+5. Provide an address, cross street, or establishment name. If more than one match is returned by Google Maps Autocomplete, the top three matches will be returned to the messaging interface for the user to select from.
+6. A service-type-specific question will be asked by the virtual agent (example: for potholes, the virtual agent asks if the pothole is in the intersection, curb lane, bike lane, crosswalk, or traffic lane). If the same question is asked again, it means that the virtual agent was unable to match your response to any of the five options listed above.
+7. Provide a description, any description text would do.
+8. The agent will ask if you'd like to be notified - here you have the option of providing a phone and email. To skip, press "Skip" or reject in a negatory experession of your choice.
+9. At this point, our solution will push the request to Chicago's Open311 system and will query our databases to get an average time of completion for the given service request type.
+10. Successful completion of these two tasks are indicated by "Your request has been submitted successfully" OR "Your request is a duplicate in our system!" and "Requests for _ in the _ area are typically serviced within _ days at this time of year.", respectively.
+11. The virtual agent will ask for feedback using the buttons, and will ask for any additional feedback as an open field. NOTE: feedback is currently not being collected in our databases.
+12. Conversation ends with the agent providing option to go back to the main menu.
+
+To verify that the request posted to Chicago's Open311 systems, you can pull back requests using the following instructions:
+1. Open up an ipython instance
+2. Run the following:
+    import requests
+    url = 'http://test311api.cityofchicago.org/open311/v2/requests.json'
+    requests.get(url).json()
+3. The code above returns a list of dictionaries holding previously submitted requests. You should see your request at the top of the results.
+
+To verify that the user interaction was logged in our database, you can connect to our database tables using the tool of your choice. We recommend pgAdmin4. You can connect to our database by using the credentials provided in our credentials.txt file in the folder we shared with you.
+1. Connect to the database using provided credentials.
+2. View the 'dialogflow_transactions' table to see stored user interactions.
+
+To see the data that we query when calculating average response times, 
