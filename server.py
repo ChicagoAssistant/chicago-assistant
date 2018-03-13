@@ -341,16 +341,10 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
             with conn2.cursor() as cur:
 
                 cur.execute(queries.RECORD_TRANSACTION,
-<<<<<<< HEAD
                             (session_Id, request_time, service_type, 
                              description, request_spec, address_string, lat,
                              lng, email, first_name, last_name, phone, 
                              post_status, token))
-=======
-                            (session_Id, request_time, service_type, description, 
-                             request_spec, address_string, lat, lng, email, 
-                             first_name, last_name, phone, post_status, token))
->>>>>>> e28ed5e9a65f5e79a53bad4aee32eeb1c592161f
 
                 conn2.commit()
     except Exception as e:
@@ -365,7 +359,7 @@ def daily_db_update(historicals_list, days_back = 1):
     updates for pothole, rodent, and single-streetlight-out requests.
 
     Inputs:
-        - historicals_list (list of dictionaries): service request type details 
+        - historicals_list (list of dictionaries): service request type details
             including API endpoint, pertinent column names and order for 
             parsing API request results for pothole, rodent, and streetlight 
             reqeusts.
