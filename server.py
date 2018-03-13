@@ -253,7 +253,7 @@ def request_triggered_query(req):
             Python (http://initd.org/psycopg/docs/sql.html)
     '''
     service_type = get_service_type(req)
-    table = get_tablename(service_type)
+    tablename = get_tablename(service_type)
     lat, lng, formatted_address = geocode(req, GMAPS)
 
     both_q = sql.SQL(queries.TIME_LOC).format(tbl=sql.Identifier(tablename))
