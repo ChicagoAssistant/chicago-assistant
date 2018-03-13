@@ -1,4 +1,4 @@
-def geocode(req):
+def geocode(req, client):
     '''
     Function that will geocode an address and return lat, long, and
     a formatted address. Google Maps used for geocoding.
@@ -17,7 +17,7 @@ def geocode(req):
         address = parameters['address']
     if 'Chicago' not in address:
         address += ' Chicago, IL'
-    result = GMAPS.geocode(address)[0]
+    result = client.geocode(address)[0]
     lat = result['geometry']['location']['lat']
     lng = result['geometry']['location']['lng']
     formatted_address = result['formatted_address']

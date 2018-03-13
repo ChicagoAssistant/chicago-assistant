@@ -188,7 +188,7 @@ def post_request(req):
         phone = ''
     first_name = parameters['first-name']
     last_name = parameters['last-name']
-    lat, lng, address_string = geocode(req)
+    lat, lng, address_string = geocode(req, GMAPS)
 
     post_data = structure_post_data(
         service_code,
