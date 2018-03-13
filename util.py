@@ -1,5 +1,3 @@
-import googlemaps
-
 def geocode(req, client):
     '''
     Function that will geocode an address and return lat, long, and

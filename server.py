@@ -180,12 +180,8 @@ def post_request(req):
     attribute = generate_attribute(service_type, request_spec)
     description = parameters['description']
     request_spec = parameters['request-spec']
-    try:
-        email = parameters['email']
-        phone = parameters['phone-number']
-    except BaseException:
-        email = ''
-        phone = ''
+    email = parameters['email']
+    phone = parameters['phone-number']
     first_name = parameters['first-name']
     last_name = parameters['last-name']
     lat, lng, address_string = geocode(req, GMAPS)
