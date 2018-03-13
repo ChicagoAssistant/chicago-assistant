@@ -20,7 +20,9 @@ Our web application is hosted on Heroku via the 'production' branch of our GitHu
 Code that was used to gather 311 raw text data from other cities for training can be found in the 'data_collection' folder in our repository.
 
 ### Description of Code Structure: 
-- Our code is used each time DialogFlow sends a webhook request to our web application. For an example of the data that is passed to our web application, see an example here: https://github.com/civicchifecta/311-agent/blob/master/example_dialogflow_request.json Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
+<<<<<<< HEAD
+- Our code is used each time DialogFlow sends a webhook request to our web application. For an example of the data that is passed to our web application, see an example here: https://github.com/civicchifecta/311-agent/blob/master/example_dialogflow_request.json 
+- Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
     1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addresses are matched, then our web application passes back up to three recommended addresses to select from.
     2. When all pertinent request information has been collected from the user, the information is sent to our web application via webhook and our code parses the information to structure and post the request to the Open311 system. Also, this is the point where our web application will query our databases to get the average response times in addition to recording the user interaction in our databases.
     3. There are several points in the conversation that our web application is used to direct the flow of conversation - this can be seen in the "makeWebhookRequest" function. The different actions shown in the followupEvent function correspond to an "Intent" in DialogFlow triggered by the followup event (see https://dialogflow.com/docs/events for more info).
@@ -72,3 +74,9 @@ To verify that the user interaction was logged in our database, you can connect 
 
 ### See Historical Request Data
 To see historical request data that we query when calculating average response times, you can connect to our database and see the tables in the public schema. Again, credentials for connecting to our database can be found in the 'credentials.txt' we provided via the folder we shared with you.
+
+## Data Sources
+
+**Historical Chicago 311 Request Data:** We used data from Chicago's Open Data Portal, specifically pothole, rodent baiting, and street light requests from the last 4 years.
+
+**Training Phrase Data From Multiple Cities:** In order to train our agent, we explored and used raw text data from Cincinnati, Baton Rouge, Gainesville, Kansas City, New Orleans, and Chicago.
