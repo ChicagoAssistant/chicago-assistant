@@ -25,11 +25,12 @@ NOTE: The flow of conversation, natural language processing, and integration wit
 
 
 ### Team member contributions:
-Vidal was responsible for implementing the flow of dialogue into DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
 
 Loren
 
 Darshan
+
+Vidal was responsible for implementing the flow of dialogue into DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
 
 
 ## Instructions for Trying the Solution and Verifying Successful Trial
