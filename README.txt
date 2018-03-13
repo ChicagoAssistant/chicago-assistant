@@ -13,14 +13,11 @@ Our web application is hosted on Heroku via the 'production' branch of our GitHu
 
     - queries.py: holds queries that are used to determine the average historical time for request fulfillment, and to create and update tables
 
-	- db_interactions: holds code used to create initial tables
-
     - page.html: holds Bootstrap and customized HTML for app webpage
 
 Code that was used to gather 311 raw text data from other cities for training can be found in the 'data_collection' folder in our repository.
 
 ### Description of Code Structure: 
-<<<<<<< HEAD
 - Our code is used each time DialogFlow sends a webhook request to our web application. For an example of the data that is passed to our web application, see an example here: https://github.com/civicchifecta/311-agent/blob/master/example_dialogflow_request.json 
 - Our 'server.py' file handles the bulk of our functionality with support from 'util.py' and 'queries.py'. When a user messages our virtual agent, DialogFlow handles the conversation independently except for in the following key situations:
     1. When a user gives an address, the address is passed to our python web application via webhook to process and verify that it is an address. If not an address or if multiple addresses are matched, then our web application passes back up to three recommended addresses to select from.
@@ -32,7 +29,7 @@ NOTE: The flow of conversation, natural language processing, and integration wit
 
 ### Team member contributions:
 
-Loren was responsible for compiling historical 311 service request data from the city of Chicago open data portal into a Postgres database that could be queried for sservice request resolution time, including initializing the PostGIS extension with shapefiles corresponding to Chicago neighborhood boundaries from the Chicago Open Data Portal so the virtual agent could give location-specific responses. She also wrote code to request newly updated service request records from Chicago's Socrata 311 APIs for pothole (https://dev.socrata.com/foundry/data.cityofchicago.org/787j-mys9), single streetlight out (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Street-Lights-One-Out/3aav-uy2v), and rodent baiting (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Rodent-Baiting/97t6-zrhs) service requests. Loren wrote the code for for gathering and organizing historical 311 request data from non-Chicago cities for parsing in order to gather training phrases for DialogFlow and customized the main website page using Bootstrap.
+Loren was responsible for compiling historical 311 service request data from the city of Chicago open data portal into a Postgres database that could be queried for sservice request resolution time, including initializing the PostGIS extension with shapefiles corresponding to Chicago neighborhood boundaries from the Chicago Open Data Portal so the virtual agent could give location-specific responses. She also wrote code to request newly updated service request records from Chicago's Socrata 311 APIs for pothole (https://dev.socrata.com/foundry/data.cityofchicago.org/787j-mys9), single streetlight out (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Street-Lights-One-Out/3aav-uy2v), and rodent baiting (https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Rodent-Baiting/97t6-zrhs) service requests. Loren wrote the code for for gathering and organizing historical 311 request data from non-Chicago cities for parsing in order to gather training phrases for DialogFlow and customized a Bootstrap template for the main website page.
 
 Darshan
 
