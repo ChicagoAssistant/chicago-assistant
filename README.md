@@ -29,7 +29,7 @@ NOTE: The flow of conversation, natural language processing, and integration wit
 
 Loren
 
-Darshan
+Darshan was responsible for data exploration and generating the Training Phrases from the raw unstructured text data for the 311 Service Requests data extracted from all the cities. Darshan also did the initial review of Service Request Forms on the Chicago API, used subsequently to identify the Entities, Intents, and corresponding Training Phrases to be generated. Darshan mainly carried out the data exploration using a combination of standardized functions (documented in 'training_phrases.py') and Manual Review of phrases extracted using Excel. Darshan also fed in the training phrases selected to DialogFlow.
 
 Vidal was responsible for implementing the flow of dialogue into DialogFlow and writing the code that integrated DialogFlow with our web application (makeWebhookResult and all functions and helper functions used by makeWebhookResult). In DialogFlow, you can see each of the "Intents" that trigger each part of the conversation. Similarly, you can see the "Entities" we created in order to map a users response to the data we needed to push to the Open311 API (example: user says, 'hole in the street', the Entity returns, 'pothole'). Vidal also wrote the code which posts the service request to Chicago's Open311 system (see API documentation here: http://dev.cityofchicago.org/docs/open311/).
 
