@@ -261,7 +261,7 @@ def request_triggered_query(req):
 
     conn2 = psycopg2.connect(CONNECTION_STRING)
     cur = conn2.cursor()
-    cur.execute(both_q, [input_longitude, input_latitude])
+    cur.execute(both_q, [lng, lat])
     res = cur.fetchone()
     print(res)
 
@@ -274,7 +274,7 @@ def request_triggered_query(req):
         loc_only = True
 
         loc_q = sql.SQL(queries.LOC_ONLY).format(tbl=sql.Identifier(tablename))
-        cur.execute(loc_q, [input_longitude, input_latitude])
+        cur.execute(loc_q, [lng, lat])
         res = cur.fetchone()
         print(res)
 
