@@ -210,7 +210,8 @@ def post_request(req):
     except BaseException:
         token = ''
 
-    status_message = generate_post_status_message(response.status_code)
+    status_code = response.status_code
+    status_message = generate_post_status_message(status_code)
 
     write_to_db(
         req,
