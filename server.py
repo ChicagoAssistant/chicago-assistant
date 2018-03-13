@@ -10,6 +10,9 @@ from flask import render_template
 import googlemaps
 import requests
 from clock import sched
+from util import (filter_city, get_action, get_service_code, get_service_type, 
+                   get_address_recs, get_tablename, generate_post_status_message, 
+                   generate_attribute, structure_post_data, geocode)
 from chi311_import import historicals, check_updates, dedupe_df, update_table
 import queries
 
@@ -17,9 +20,7 @@ app = Flask(__name__)
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
 GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
 OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
-gmaps = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
-
-
+GMAPS = googlemaps.Client(key=GMAPS_PLACES_APPTOKEN)
 USER = os.environ['DB_USER']
 NAME = os.environ['DB_NAME']
 PW = os.environ['DB_PW']
@@ -35,7 +36,8 @@ CONNECTION_STRING = "dbname='{}' user='{}' host='{}' port='{}' password='{}' ssl
 @app.route('/webhook', methods=['POST'])
 def webhook():
     '''
-    Recieves and responds to DialogFlow webhook post requests.
+    Recieves DialogFlow requests, generates response via makeWebhookResult,
+    and sends back the response.
     '''
     req = request.get_json(silent=True, force=True)
     print('Request:\n', json.dumps(req, indent=4))
@@ -50,12 +52,7 @@ def webhook():
     return r
 
 
-@app.route('/', methods=['GET'])
-def hello():
-    return "Hello World!"
-
-
-@app.route('/test')
+@app.route('/')
 def test():
     return render_template('page.html')
 
@@ -69,21 +66,18 @@ def makeWebhookResult(req):
     '''
     action = get_action(req)
     if action == 'name':
-        return followupEvent('get_address')
+        return followupEvent('get_address') #Triggers question to get address
 
     if action == 'get.address':
         return process_address(req)
 
     if action == 'address.corrected':
-        return process_address(req, True)
+        return process_address(req, True) 
 
-    if action == 'request.complete':
-        # process the average number of days to complete request
+    if action == 'request.complete': #Triggers post of request and average number
+        #of days to complete request
         status_message = post_request(req)
-        service_type = get_service_type(req)
-        table = get_tablename(service_type)
-        lat, lng, formatted_address = return_address_params(req)
-        completion_message = request_triggerd_query(table, lat, lng)
+        completion_message = request_triggered_query(req)
 
         data = {"completion_time": completion_message,
                 "post_status": status_message}
@@ -91,132 +85,9 @@ def makeWebhookResult(req):
         return followupEvent('completion_time', data)
 
 
-def process_address(req, corrected=False):
-    '''
-    Manages collection of viable address. If an adequate address is given
-    (i.e. a single match is found via google maps autocomplete), then
-    the conversation continues. If there aren't any matches, then the
-    conversation will direct the user to enter the address again. In the case
-    that there is more than one match, this function will pass back up to
-    three address recommended matches for the user to select from.
-
-    Inputs:
-        - req (dict) data from DialogFlow where the address given by the
-            user is stored
-    Outputs:
-        - followupEvent action: depending on the quality of the address
-            provided by the user, this funciton will steer the conversation
-            to the end of obtaining an adequate address
-    '''
-    if corrected:
-        address = req['result']['parameters']['corrected-address']
-    else:
-        address = req['result']['parameters']['address']
-    service_type = get_service_type(req)
-
-    if 'and' in address or '&' in address:
-        return followupEvent(service_type)
-
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
-    matched_addresses = gmaps.places_autocomplete(address)
-    matched_addresses = filter_city('Chicago', matched_addresses)
-
-    if len(matched_addresses) == 0:
-        return followupEvent('get_address')
-    elif len(matched_addresses) == 1:
-        return followupEvent(service_type)
-    else:
-        address_recs = get_address_recs(matched_addresses)
-        return followupEvent('address_correct', address_recs)
-
-
-def return_address_params(req):
-    parameters = req['result']['parameters']
-    address = parameters['corrected-address']
-    if not address:
-        address = parameters['address']
-    if 'Chicago' not in address:
-        address += ' Chicago, IL'
-    clean_geos = geocode(address)
-    return clean_geos
-
-
-def post_request(req):
-    '''
-    Extracts all required data from DialogFlow post request containing
-    all user inputs, structures the data into a dictionary which can
-    then be passed as a post request to the Chicago Open311 environment.
-
-    Inputs:
-        - req (json): information passed from DialogFlow webhook containing
-            user inputs
-    Outputs:
-        - status_message (string): status message indicating whether
-            the post request submitted successfully or failed
-    '''
-    url = API_ENDPOINT + '/requests.json'
-
-    parameters = req['result']['parameters']
-    service_type = get_service_type(req)
-    service_code = get_service_code(service_type)
-
-    request_spec = parameters['request-spec']
-    attribute = generate_attribute(service_type, request_spec)
-    description = parameters['description']
-    request_spec = parameters['request-spec']
-    try:
-        email = parameters['email']
-        phone = parameters['phone-number']
-    except BaseException:
-        email = ''
-        phone = ''
-    first_name = parameters['first-name']
-    last_name = parameters['last-name']
-    lat, lng, address_string = return_address_params(req)
-    post_data = structure_post_data(
-        service_code,
-        attribute,
-        lat,
-        lng,
-        description,
-        address_string,
-        email,
-        first_name,
-        last_name,
-        phone)
-
-    print('OPEN_311_POST_REQUEST:', post_data)
-    response = requests.post(url, data=post_data)
-    print('OPEN_311_RESPONSE:', response.text)
-    try:
-        token = response.json()[0]['token']
-    except BaseException:
-        token = ''
-    status_code = response.status_code
-    status_message = generate_post_status_message(status_code)
-
-    write_to_db(
-        req,
-        token,
-        service_type,
-        request_spec,
-        lat,
-        lng,
-        description,
-        address_string,
-        status_code,
-        email,
-        first_name,
-        last_name,
-        phone)
-
-    return status_message
-
-
 def followupEvent(event_key, data=None):
     '''
-    Helper function that returns the webhook response needed
+    Function that returns the webhook response needed
     based on where the conversation needs to go next. The 'events'
     below specify one of any events that are triggered in the
     conversation. This function simply constructs the appropriate
@@ -246,177 +117,115 @@ def followupEvent(event_key, data=None):
     return {"followupEvent": {"name": '{}'.format(event)}}
 
 
-def filter_city(city, gmaps_locs):
+def process_address(req, corrected = False):
     '''
-    Filter out any locations that are not in the city of interest.
+    Manages collection of viable address. If an adequate address is given
+    (i.e. a single match is found via google maps autocomplete), then
+    the conversation continues. If there aren't any matches, then the
+    conversation will direct the user to enter the address again. In the case
+    that there is more than one match, this function will pass back up to
+    three address recommended matches for the user to select from.
+
     Inputs:
-        - city (string): name of the city of jurisdiction
-        - gmaps_locs (list of dicts): results returned from call to googlemaps
-             places_autocomplete method
+        - req (dict) data from DialogFlow where the address given by the
+            user is stored
     Outputs:
-        - locations (list of dict(s)): filtered locations for city of interest
+        - followupEvent action: depending on the quality of the address
+            provided by the user, this funciton will steer the conversation
+            to the end of obtaining an adequate address
     '''
-    locations = [gmaps_loc for gmaps_loc in gmaps_locs
-                 if city in gmaps_loc['description']]
-    return locations
+    if corrected:
+        address = req['result']['parameters']['corrected-address']
+    else:
+        address = req['result']['parameters']['address']
+    service_type = get_service_type(req)
+
+    if 'and' in address or '&' in address:
+        return followupEvent(service_type)
+    if 'Chicago' not in address:
+        address += ' Chicago, IL'
+
+    matched_addresses = GMAPS.places_autocomplete(address)
+    matched_addresses = filter_city('Chicago', matched_addresses)
+
+    if len(matched_addresses) == 0:
+        return followupEvent('get_address') #Ask for address again.
+    elif len(matched_addresses) == 1:
+        return followupEvent(service_type) #Address collected, continue convo.
+    else:
+        address_recs = get_address_recs(matched_addresses)
+        return followupEvent('address_correct', #Send back address matches.
+                             address_recs) 
 
 
-def get_action(req):
+def post_request(req):
     '''
-    Helper function to get action from request.
+    Extracts all required data from DialogFlow post request containing
+    all user inputs, structures the data into a dictionary which can
+    then be passed as a post request to the Chicago Open311 environment.
+
     Inputs:
-        - req (json): information passed from DialogFlow webhook
+        - req (json): information passed from DialogFlow webhook containing
+            user inputs
     Outputs:
-        - action (string) action from DialogFlow which determines proceeding
-          action.
+        - status_message (string): status message indicating whether
+            the post request submitted successfully or failed
     '''
-    # ACTION_TYPES = {'get.address':'flow','address.corrected':'flow','name':'flow','request.complete':''}
+    url = API_ENDPOINT + '/requests.json'
+    service_type = get_service_type(req)
+    service_code = get_service_code(service_type)
+
+    parameters = req['result']['parameters']
+    request_spec = parameters['request-spec']
+    attribute = generate_attribute(service_type, request_spec)
+    description = parameters['description']
+    request_spec = parameters['request-spec']
+    email = parameters['email']
+    phone = parameters['phone-number']
+    first_name = parameters['first-name']
+    last_name = parameters['last-name']
+    lat, lng, address_string = geocode(req)
+
+    post_data = structure_post_data(
+        service_code,
+        attribute,
+        lat,
+        lng,
+        description,
+        address_string,
+        email,
+        first_name,
+        last_name,
+        phone)
+
+    response = requests.post(url, data = post_data)
+
     try:
-        action = req['result']['action']
-        return action
-    except Exception:
-        print('No action to grab from request.')
+        token = response.json()[0]['token']
+    except BaseException:
+        token = ''
+
+    status_message = generate_post_status_message(response.status_code)
+
+    write_to_db(
+        req,
+        token,
+        service_type,
+        request_spec,
+        lat,
+        lng,
+        description,
+        address_string,
+        status_code,
+        email,
+        first_name,
+        last_name,
+        phone)
+
+    return status_message
 
 
-def get_service_type(req):
-    '''
-    Given a DialogFlow json, get the service type of the request.
-    Inputs:
-        - req (json): information passed from DialogFlow webhook
-    Outputs:
-        - service_type (string): service type of request
-    '''
-    service_type = req['result']['parameters']['service-type']
-    return service_type
-
-
-def get_address_recs(matched_addresses):
-    '''
-    Helper function, in the case of multiple address matches, this function will
-    return up to the top three address recommendations.
-    Inputs:
-        - matched_addresses (dict): address match results from google maps
-            places autocomplete
-    Outputs:
-        - recommendations (dict): three addresses in a dictionary in the
-            required format to be passed back to DialogFlow as data in a
-            followupEvent dictionary.
-    '''
-    address_recs = ['', '', '']
-    for num, matched_addresses in enumerate(matched_addresses[:3]):
-        address = matched_addresses['description']
-        address_recs[num] = address
-
-    recommendations = {"address1": address_recs[0],
-                       "address2": address_recs[1],
-                       "address3": address_recs[2]}
-
-    return recommendations
-
-
-def get_service_code(service_type):
-    '''
-    Helper function to get the service code given a string.
-    Inputs:
-        - service_type (string): service type generated in DialogueFlow
-            based on user input
-    Outputs:
-        - service_code (string): Open311 service code for service request
-    '''
-    service_types = {'pothole': '4fd3b656e750846c53000004',
-                     'rodent': '4fd3b9bce750846c5300004a',
-                     'street light': '4ffa9f2d6018277d400000c8'}
-
-    return service_types[service_type]
-
-
-def generate_post_status_message(status_code):
-    '''
-    Helper function to return status message given a status code.
-    '''
-    status_messages = {201: 'Your request has been submitted successfully!',
-                       400: 'Your request is a duplicate in our system!'}
-
-    return status_messages[status_code]
-
-
-def structure_post_data(service_code, attribute, lat, lng, description,
-                        address_string, email, first_name, last_name, phone):
-    '''
-    Helper function to structure all user inputs into appropriate
-    dictionary format that will be passed to Open311 systems.
-    '''
-    post_data = {'service_code': service_code,
-                 'attribute': attribute,
-                 'lat': lat,
-                 'long': lng,
-                 'first_name': first_name,
-                 'last_name': last_name,
-                 'email': email,
-                 'address_string': address_string,
-                 'phone_number': phone,
-                 'description': description,
-                 'api_key': OPEN_311_APPTOKEN}
-
-    return post_data
-
-
-def generate_attribute(service_type, request_spec):
-    '''
-    Helper function to create dictionary needed for the Open311 post request.
-    '''
-    attributes = {
-        'pothole':
-        {'intersection': {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}},
-         'bike lane': {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}},
-         'crosswalk': {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}},
-         'curb lane': {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}},
-         'traffic lane': {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}},
-        'rodent':
-        {'yes': {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}},
-         'no': {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}},
-        'street light':
-        {'completely out': {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}},
-         'on and off': {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}}}
-
-    return attributes[service_type][request_spec]
-
-
-def geocode(address):
-    '''
-    Function that will geocode an address and return lat, long, and
-    a formatted address. Google Maps used for geocoding.
-
-    Inputs:
-        - address (string): address of service request given by user
-    Outputs:
-        - lat (float): latitude of address as given by google maps
-        - lng (float): longitude of address as given by google maps
-        - formatted_address (string): full address of location as given
-            by google maps
-    '''
-    result = gmaps.geocode(address)[0]
-
-    lat = result['geometry']['location']['lat']
-    lng = result['geometry']['location']['lng']
-    formatted_address = result['formatted_address']
-
-    return lat, lng, formatted_address
-
-
-def get_tablename(db_key):
-    '''
-    Return name of associated Postgres database table from Open311/ 
-    Dialogflow service request type names
-    '''
-    db_map = {'pothole': 'potholes', 'rodent': 'rodents',
-              'street light': 'streetlights',
-              'dialogflow': 'dialogflow_transactions'}
-
-    return db_map[db_key]
-
-
-def request_triggerd_query(tablename, input_latitude, input_longitude):
+def request_triggered_query(req):
     '''
     Given a user's location and the type of request, query average historical
     resolution time for the two weeks pre- and post- today's day/ month in the 
@@ -425,12 +234,8 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
     Neighborhood Boundaries. 
 
     Inputs:
-        - tablename (string): name of table in Postgres database associated with
-            customer's service request type 
-        - input_latitude (float): latitude associated with customer's address 
-            returned from googlemaps API
-        - input_longitude (float): longitude associated with customer's address 
-            returned from googlemaps API
+        -req (request): request containing information from DialogFlow including
+            service type and query parameters 
 
     Output: 
         - completion_message (str): formatted message indicating historical
@@ -441,6 +246,10 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
             documentation for parameterizing table names in SQL queries via 
             Python (http://initd.org/psycopg/docs/sql.html)
     '''
+    service_type = get_service_type(req)
+    table = get_tablename(service_type)
+    lat, lng, formatted_address = geocode(req)
+
     both_q = sql.SQL(queries.TIME_LOC).format(tbl=sql.Identifier(tablename))
     loc_only = False
 
@@ -480,10 +289,11 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
             if num:
                 num = int(num)
                 unit = unit_index[i]
-                completion_message = "Requests for {} are typically serviced within {} {} at this time of year.".format(
-                    tablename, num, unit)
+                completion_message = '''Requests for {} are typically 
+                                        serviced within {} {} at this 
+                                        time of year.'''.format(
+                                                 tablename, num, unit)
                 return completion_message
-                print(res)
 
     if res and len(res) == 4:
         neighb = res[0]
@@ -492,19 +302,23 @@ def request_triggerd_query(tablename, input_latitude, input_longitude):
                 num = int(num)
                 unit = unit_index[i]
                 if loc_only:
-                    completion_message = "Requests for {} in the {} area are typically serviced within {} {}.".format(
-                        tablename, neighb, num, unit)
-
+                    completion_message = '''Requests for {} in the {} area 
+                                            are typically serviced within 
+                                            {} {}.'''.format(
+                                            tablename, neighb, num, unit)
                 else:
-                    completion_message = "Requests for {} in the {} area are typically serviced within {} {} at this time of year.".format(
-                        tablename, neighb, num, unit)
-
+                    completion_message = '''Requests for {} in the {} area are 
+                                            typically serviced within {} {} at 
+                                            this time of year.'''.format(
+                                                 tablename, neighb, num, unit)
                 return completion_message
 
     # if no results returned, proceed with default message.
     if not res:
-        completion_message = "Thank you for your 311 {} request! If you provided your contact information, we'll let you know when the city marks it complete.".format(
-            tablename)
+        completion_message = '''Thank you for your {} request! 
+                                If you provided your contact 
+                                information, we'll let you know when the 
+                                city marks it complete.'''.format(tablename)
         return completion_message
 
 
