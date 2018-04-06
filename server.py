@@ -57,7 +57,7 @@ def webhook():
     return r
 
 @app.route('/demo')
-def render_page():
+def render_page2():
     return render_template('page1.html')
 
 @app.route('/')
