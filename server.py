@@ -17,7 +17,7 @@ from agent.util import (filter_city, get_action, get_service_code, get_service_t
                    generate_post_status_message,
                    generate_attribute, structure_post_data, geocode)
 from agent.chi311_import import historicals, check_updates, dedupe_df, update_table
-import agent.queries
+import agent.queries as queries
 
 app = Flask(__name__, static_url_path='/static')
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
