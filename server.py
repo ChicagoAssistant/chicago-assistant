@@ -7,7 +7,7 @@ import urllib
 import json
 import os
 import psycopg2
-from psycopg2 import sql
+from psycopg2 import sql 
 from flask import Flask, request, make_response, render_template
 import googlemaps
 import requests
