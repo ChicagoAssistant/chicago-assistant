@@ -1,6 +1,6 @@
-#                     Documentation of Code Ownership  
-# Original code or heavily modified given structure unless otherwise noted in 
-# function header.  
+#                     Documentation of Code Ownership
+# Original code or heavily modified given structure unless otherwise noted in
+# function header.
 
 
 import urllib
@@ -13,13 +13,13 @@ import googlemaps
 import requests
 from clock import sched
 from util import (filter_city, get_action, get_service_code, get_service_type,
-                   get_address_recs, get_tablename, 
+                   get_address_recs, get_tablename,
                    generate_post_status_message,
                    generate_attribute, structure_post_data, geocode)
 from chi311_import import historicals, check_updates, dedupe_df, update_table
 import queries
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
 GMAPS_PLACES_APPTOKEN = os.environ['GMAPS_PLACES_APPTOKEN']
 OPEN_311_APPTOKEN = os.environ['OPEN_311_APPTOKEN']
@@ -32,8 +32,8 @@ PORT = os.environ['DB_PORT']
 SSL_DIR = os.path.dirname(__file__)
 SSL = os.environ['SSL']
 SSL_PATH = os.path.join(SSL_DIR, SSL)
-CONNECTION_STRING = """dbname='{}' user='{}' host='{}' port='{}' 
-                        password='{}' sslmode='verify-full' 
+CONNECTION_STRING = """dbname='{}' user='{}' host='{}' port='{}'
+                        password='{}' sslmode='verify-full'
                         sslrootcert='{}'""".format(
                         NAME, USER, HOST, PORT, PW, SSL_PATH)
 
@@ -56,11 +56,11 @@ def webhook():
 
     return r
 
-@app.route('/demo')
+@app.route('/')
 def render_page2():
     return render_template('page1.html')
 
-@app.route('/')
+@app.route('/classproject')
 def render_page():
     return render_template('page.html')
 
@@ -169,7 +169,7 @@ def process_address(req, corrected = False):
     else:
         address_recs = get_address_recs(matched_addresses)
         return followupEvent('address_correct', #Send back address matches.
-                             address_recs) 
+                             address_recs)
 
 
 def post_request(req):
@@ -201,7 +201,7 @@ def post_request(req):
     last_name = parameters['last-name']
     lat, lng, address_string = geocode(req, GMAPS)
 
-    post_data = structure_post_data(service_code, attribute, lat, lng, 
+    post_data = structure_post_data(service_code, attribute, lat, lng,
                                     description, address_string, email,
                                     first_name, last_name, phone,
                                     OPEN_311_APPTOKEN)
@@ -224,22 +224,22 @@ def post_request(req):
 
 def request_triggered_query(req):
     '''
-    Query average historical resolution time for the two weeks pre- and post- 
-    today's day/ month in the last four years for the type of request. 
-    Limit query to the neighborhood containing reported location according 
-    to Chicago Open Data Portal Neighborhood Boundaries. 
+    Query average historical resolution time for the two weeks pre- and post-
+    today's day/ month in the last four years for the type of request.
+    Limit query to the neighborhood containing reported location according
+    to Chicago Open Data Portal Neighborhood Boundaries.
 
     Inputs:
-        -req (request): request containing information from DialogFlow 
-            including service type and query parameters 
+        -req (request): request containing information from DialogFlow
+            including service type and query parameters
 
-    Output: 
+    Output:
         - completion_message (str): formatted message indicating historical
-            average response time  
+            average response time
 
     Attribution:
-        - Calls to psycopg2.sql function crafted based on examples in psycog2 
-            documentation for parameterizing table names in SQL queries via 
+        - Calls to psycopg2.sql function crafted based on examples in psycog2
+            documentation for parameterizing table names in SQL queries via
             Python (http://initd.org/psycopg/docs/sql.html)
     '''
     service_type = get_service_type(req)
@@ -258,7 +258,7 @@ def request_triggered_query(req):
     unit_index = {0: 'months', 1: 'weeks', 2: 'days'}
 
     # if there is no information on the specific neighborhood at the given time
-    # of year, check for that neighborhood only; check for that time only if 
+    # of year, check for that neighborhood only; check for that time only if
     # there are no results for the given neighborhood
     if res and all(v is None for v in res):
         loc_only = True
@@ -286,8 +286,8 @@ def request_triggered_query(req):
             if num:
                 num = int(num)
                 unit = unit_index[i]
-                completion_message = '''Requests for {} are typically 
-                                        serviced within {} {} at this 
+                completion_message = '''Requests for {} are typically
+                                        serviced within {} {} at this
                                         time of year.'''.format(
                                                  tablename, num, unit)
                 return completion_message
@@ -299,22 +299,22 @@ def request_triggered_query(req):
                 num = int(num)
                 unit = unit_index[i]
                 if loc_only:
-                    completion_message = '''Requests for {} in the {} area 
-                                            are typically serviced within 
+                    completion_message = '''Requests for {} in the {} area
+                                            are typically serviced within
                                             {} {}.'''.format(
                                             tablename, neighb, num, unit)
                 else:
-                    completion_message = '''Requests for {} in the {} area are 
-                                            typically serviced within {} {} at 
+                    completion_message = '''Requests for {} in the {} area are
+                                            typically serviced within {} {} at
                                             this time of year.'''.format(
                                                  tablename, neighb, num, unit)
                 return completion_message
 
     # if no results returned, proceed with default message
     if not res:
-        completion_message = '''Thank you for your {} request! 
-                                If you provided your contact 
-                                information, we'll let you know when the 
+        completion_message = '''Thank you for your {} request!
+                                If you provided your contact
+                                information, we'll let you know when the
                                 city marks it complete.'''.format(tablename)
         return completion_message
 
@@ -326,7 +326,7 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
     '''
     Captures details of a Dialogflow transaction and Open311 POST request in
     Postgres database, including token associated with POST request that will
-    be attached to a service request number once the request is approved by 
+    be attached to a service request number once the request is approved by
     the city.
     Inputs:
         - req (json) request containing all user input information
@@ -352,9 +352,9 @@ def write_to_db(req, token, service_type, request_spec, lat, lng, description,
             with conn2.cursor() as cur:
 
                 cur.execute(queries.RECORD_TRANSACTION,
-                            (session_Id, request_time, service_type, 
+                            (session_Id, request_time, service_type,
                              description, request_spec, address_string, lat,
-                             lng, email, first_name, last_name, phone, 
+                             lng, email, first_name, last_name, phone,
                              post_status, token))
 
                 conn2.commit()
@@ -369,17 +369,17 @@ def daily_db_update(historicals_list, days_back = 1):
     Make GET request to Chicago's Socrata 311 API to get the previous day's
     updates for pothole, rodent, and single-streetlight-out requests; remove
     duplicates, and insert into Postgres database table corresponding to each
-    service request type 
+    service request type
 
     Inputs:
         - historicals_list (list of dictionaries): service request type details
-            including API endpoint, pertinent column names and order for 
-            parsing API request results for pothole, rodent, and streetlight 
+            including API endpoint, pertinent column names and order for
+            parsing API request results for pothole, rodent, and streetlight
             reqeusts.
-        - days_back (integer): number of days in the past for which to request 
+        - days_back (integer): number of days in the past for which to request
             updates from the 311 API.
     '''
-    # iterate over the list of service request detail dictionaries, updating 
+    # iterate over the list of service request detail dictionaries, updating
     # each one in the Postgres database
     for service_dict in historicals_list:
         updated = check_updates(service_dict, days_back)
@@ -393,11 +393,11 @@ if __name__ == '__main__':
     update_job_id = 'nightly_update_' + datetime.now().isoformat()
     sched.add_job(
         func=daily_db_update,
-        trigger='cron', 
-        id=update_job_id, 
-        day_of_week='0-6', 
-        hour=10, minute=12, 
-        args=[historicals], 
+        trigger='cron',
+        id=update_job_id,
+        day_of_week='0-6',
+        hour=10, minute=12,
+        args=[historicals],
         jitter=30)
     if not sched.running:
         sched.start()
