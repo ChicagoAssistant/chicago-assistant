@@ -11,13 +11,13 @@ from psycopg2 import sql
 from flask import Flask, request, make_response, render_template
 import googlemaps
 import requests
-from clock import sched
-from util import (filter_city, get_action, get_service_code, get_service_type,
+from agent.clock import sched
+from agent.util import (filter_city, get_action, get_service_code, get_service_type,
                    get_address_recs, get_tablename,
                    generate_post_status_message,
                    generate_attribute, structure_post_data, geocode)
-from chi311_import import historicals, check_updates, dedupe_df, update_table
-import queries
+from agent.chi311_import import historicals, check_updates, dedupe_df, update_table
+import agent.queries
 
 app = Flask(__name__, static_url_path='/static')
 API_ENDPOINT = 'http://test311api.cityofchicago.org/open311/v2'
