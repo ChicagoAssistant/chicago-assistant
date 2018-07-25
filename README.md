@@ -1,6 +1,6 @@
 ## Chi, Chicago's Virtual Assistant
 
-**Working Prototype:** http://chicago-311-agent.herokuapp.com/
+**Depricated Prototype:** http://chicago-assistant-depricated.herokuapp.com/
 
 ### Current Functionality
  - Submit a pothole request
@@ -8,7 +8,7 @@
  - Submit a request for rodent baiting
 
 
-### Current Integrations:
+### Integrations:
  - [DialogFlow](https://dialogflow.com/)
  - [Chicago Open311](http://dev.cityofchicago.org/docs/open311/)
  - Google Maps Places API
