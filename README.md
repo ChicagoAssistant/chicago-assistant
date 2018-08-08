@@ -1,5 +1,6 @@
 ## Chicago Assistant
 
+<<<<<<< HEAD
 The Chicago Assistant is a text and voice interface for requesting city services and making inquires about city services. Functionalities we are currently exploring include:
  - Submit 311 Service Requests
  - Get transit arrival times and station accessibility information
@@ -10,6 +11,9 @@ The Chicago Assistant is a text and voice interface for requesting city services
 The text and voice interface could be integrated with popular messaging platforms like Facebook Messenger and popular voice interfaces like Amazon Alexa and Google Assistant.
 
 The project aims to improve ease of accessibility to city services and information about city services by creating a text and voice channel to compliment existing web and telephone (311) channels.
+=======
+**Depricated Prototype:** http://chicago-assistant-depricated.herokuapp.com/
+>>>>>>> 536b7daaf9eb746d5af5edb5ad13b46f7bf18917
 
 ### Current Functionality
  - Submit a pothole request
@@ -17,7 +21,7 @@ The project aims to improve ease of accessibility to city services and informati
  - Submit a request for rodent baiting
 
 
-### Current Integrations:
+### Integrations:
  - [DialogFlow](https://dialogflow.com/)
  - [Chicago Open311](http://dev.cityofchicago.org/docs/open311/)
  - Google Maps Places API
