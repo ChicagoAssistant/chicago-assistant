@@ -1,0 +1,64 @@
+# User intentions
+intents:
+    # Casual intents
+    - greet
+    - goodbye
+    - another_request
+    - wrong_request
+    - dont_know
+    - affirm
+    - deny
+    - other # bot didn't understand/not yet supported
+
+    # 311 service requests
+    - fix_pothole
+    - give_location
+
+    - fix_streetlight
+    - rodent_baiting
+    - garbage_can_maintainance
+
+    # Other requests
+    - transit_time
+    - contact_alderman
+
+# Pieces of info
+entities:
+    - request
+    - location
+    - location_details
+
+# Conversation status
+slots:
+    request:
+        type: text
+    location:
+        type: text
+
+# Possible actions
+actions:
+    - utter_greet
+    - utter_goodbye
+    - utter_thank_you
+    - ask_another_request
+    - utter_did_not_understand
+    - restart
+
+    - ask_location
+    - ask_location_details
+    - utter_address_not_found
+    - offer_address_suggestions
+
+    - confirm_request
+    - submit_request
+
+# What to say
+templates:
+    utter_greet:
+        - text: "Hello!"
+    utter_goodbye:
+        - text: "Have a nice day!"
+    ask_another_request:
+        - text: "Is there anything else you want to do?"
+    utter_did_not_understand:
+        - text: "Sorry, I didn't understand that." #add debug email
