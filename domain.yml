@@ -3,17 +3,18 @@ intents:
     # Casual intents
     - greet
     - goodbye
-    - another_request
-    - wrong_request
     - dont_know
     - affirm
     - deny
     - other # bot didn't understand/not yet supported
 
+    # Meta-requests
+    - another_request
+    - wrong_request
+    - check_status
+
     # 311 service requests
     - fix_pothole
-    - give_location
-
     - fix_streetlight
     - rodent_baiting
     - garbage_can_maintainance
@@ -22,9 +23,13 @@ intents:
     - transit_time
     - contact_alderman
 
+    # Request-related info
+    - give_location
+    - give_approximate_location
+
 # Pieces of info
 entities:
-    - request
+    - request_type
     - location
     - location_details
 
@@ -40,17 +45,22 @@ actions:
     - utter_greet
     - utter_goodbye
     - utter_thank_you
-    - ask_another_request
+    - utter_no_problem
+    - utter_sorry
     - utter_did_not_understand
+    - ask_another_request
     - restart
 
     - ask_location
     - ask_location_details
+    - ask_general_location
     - utter_address_not_found
     - offer_address_suggestions
 
     - confirm_request
     - submit_request
+
+    - bug_report_conversation_log
 
 # What to say
 templates:

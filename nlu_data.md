@@ -26,8 +26,34 @@
 - bye bye
 - see you later
 
+## intent:dont_know
+- I don't know
+- not sure
+- idk
+
+## intent:affirm
+- yes
+- yup
+- ya
+- yea
+- yeah
+- sure
+- right
+- correct
+
+## intent:deny
+- no
+- na
+- nah
+- wrong
+- nope
+
 ## intent:fix_pothole
 - pothole
+- hole in street
+- fill in pothole
+- fill in pavement
+- fill in asphalt
 
 ## intent:fix_streetlight
 - streetlight
