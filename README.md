@@ -1,6 +1,6 @@
-## Getting Started [Mac OS]
+# Getting Started [Mac OS]
 
-### Installing Docker
+## Installing Docker
 Install Docker  
 `brew cask install docker`
 
@@ -9,8 +9,7 @@ Once it's done installing, open up the application Launcher and start Docker. Yo
 **At this time, there is no need to create a Docker ID if you don't have one.**
 
 
-### Clone Repository
-
+## Clone Repository
 Open up a **Terminal** and navigate to a folder where you maintain your projects. In my case, I keep my projects in a **Projects** folder within my home directory.
 
 To clone the repository, run  
@@ -20,8 +19,7 @@ If you already have the repository cloned to your computer, copy the get-started
 `git checkout --track origin/get-started`
 
 
-### Create Your Own Branch
-
+## Create Your Own Branch
 Create your own branch by running (**NOTE: do not use the brackets**):  
 `git branch [yourname]-dev`  
 
@@ -33,4 +31,4 @@ Add everything and push your changes:
 `git commit -m"initial commit"`  
 `git push`
 
-### Build Docker Image
+## Build Docker Image
