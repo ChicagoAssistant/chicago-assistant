@@ -82,7 +82,8 @@ To chat with the newly trained bot, you can run:
 
 and after a few seconds you should see (**Ignore the warnings**):
 
-`WARNING  py.warnings  - /usr/local/lib/python3.5/site-packages/pykwalify/core.py:99: UnsafeLoaderWarning:
+```
+WARNING  py.warnings  - /usr/local/lib/python3.5/site-packages/pykwalify/core.py:99: UnsafeLoaderWarning:
 The default 'Loader' for 'load(stream)' without further arguments can be unsafe.
 Use 'load(stream, Loader=ruamel.yaml.Loader)' explicitly if that is OK.
 Alternatively include the following in your code:
@@ -93,7 +94,7 @@ Alternatively include the following in your code:
 In most other cases you should consider using 'safe_load(stream)'
   data = yaml.load(stream)
 
-Bot loaded. Type a message and press enter: `
+Bot loaded. Type a message and press enter: ```
 
 Try talking to it!
 
