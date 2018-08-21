@@ -96,3 +96,5 @@ In most other cases you should consider using 'safe_load(stream)'
 Bot loaded. Type a message and press enter: `
 
 Try talking to it!
+
+You can exit the chat by hitting **CNTL + C**. Finally, you can exit the created container by typing `exit`.
