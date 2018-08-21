@@ -1,0 +1,88 @@
+{
+  "rasa_nlu_data": {
+    "regex_features": [],
+    "entity_synonyms": [],
+    "common_examples": [
+      {
+        "intent": "greet",
+        "text": "hi"
+      },
+      {
+        "intent": "greet",
+        "text": "hello"
+      },
+      {
+        "intent": "greet",
+        "entities": [
+          {
+            "end": 19,
+            "start": 15,
+            "entity": "PERSON",
+            "value": "Jack"
+          }
+        ],
+        "text": "hi, my name is Jack"
+      },
+      {
+        "intent": "greet",
+        "entities": [
+          {
+            "end": 22,
+            "start": 18,
+            "entity": "PERSON",
+            "value": "Jack"
+          }
+        ],
+        "text": "hello, my name is Jack"
+      },
+      {
+        "intent": "greet",
+        "text": "hey"
+      },
+      {
+        "intent": "goodbye",
+        "text": "Bye"
+      },
+      {
+        "intent": "goodbye",
+        "text": "goodbye"
+      },
+      {
+        "intent": "goodbye",
+        "text": "peace"
+      },
+      {
+        "intent": "goodbye",
+        "text": "later"
+      },
+      {
+        "intent": "goodbye",
+        "text": "see you later"
+      },
+      {
+        "intent": "goodbye",
+        "text": "see you soon"
+      },
+      {
+        "intent": "thankyou",
+        "text": "Thank you!"
+      },
+      {
+        "intent": "thankyou",
+        "text": "thanks"
+      },
+      {
+        "intent": "thankyou",
+        "text": "thank you"
+      },
+      {
+        "intent": "thankyou",
+        "text": "I appreciate it"
+      },
+      {
+        "intent": "thankyou",
+        "text": "gracias"
+      }
+    ]
+  }
+}
