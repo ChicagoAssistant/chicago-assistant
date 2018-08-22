@@ -37,12 +37,24 @@ Add everything and push your changes:
 `git commit -m"initial commit"`  
 `git push`
 
-## Build Docker Image
+## Build Docker Image (Alternative Below)
 Now, we're going to build the Docker Image. This make take around 10 minutes to complete.  
 
 `docker build -t chicago-assistant .`
 
 Once complete, you should be all set to start building a Chicago Assistant functionality! Before we get there, though, let's see exactly how that would happen.
+
+## Alternative to Building Docker Image
+
+1. Create a [Docker ID](https://cloud.docker.com/).
+
+2. Get added to the Chicago Assistant Team on Docker. Ask Vidal to add you by giving him your Docker ID username.
+
+3. Login using `docker login -u [username] -p`
+
+4. Run `docker pull chicagoassistant/chicago-assistant`
+
+
 
 
 ## Starting Up the Container
@@ -63,7 +75,6 @@ Finally, you should navigate to your project repository by running:
 
 `cd chicago-assistant`
 
-
 ## Training the Models
 
 You can train the NLU and core functions of our project by running the following:
@@ -73,6 +84,7 @@ You can train the NLU and core functions of our project by running the following
 `make train-core`
 
 Running these commands should create a new folder in your repo called `models`.
+
 
 ## Chatting with the Bot
 
