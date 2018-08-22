@@ -19,10 +19,10 @@ slots:
 
 templates:
   utter_greet:
-    - "Hi!"
-    - "Hello, {PERSON}!"
+    - "Hi {PERSON}, I'm the Chicago Assistant! You should teach me something new!"
+    - "Hello, {PERSON}, you should teach me something new!"
     - "Hi {PERSON}, it's great to hear from you!"
-    - "Hey {PERSON}, how can I help you?"
+    - "Hey {PERSON}, can you teach me something new?"
 
   utter_goodbye:
     - "Bye!"
