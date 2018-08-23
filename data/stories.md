@@ -3,8 +3,8 @@
 * greet[PERSON=Jack]
   - slot{"PERSON": "Jack"}
   - utter_greet
-* thankyou
-  -utter_youre_welcome
+* spanish_yourwelcome
+  -utter_spanish_thankyou
 * goodbye
   - utter_goodbye
 

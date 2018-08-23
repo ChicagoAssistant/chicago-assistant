@@ -8,6 +8,8 @@ actions:
   - utter_greet
   - utter_goodbye
   - utter_youre_welcome
+  - utter_spanish_thankyou
+
 
 entities:
   - PERSON
@@ -19,7 +21,7 @@ slots:
 
 templates:
   utter_greet:
-    - "Hi {PERSON}, I'm the Chicago Assistant! You should teach me something new!"
+    - "Hi, I'm the Chicago Assistant! You should teach me something new!"
     - "Hello, {PERSON}, you should teach me something new!"
     - "Hi {PERSON}, it's great to hear from you!"
     - "Hey {PERSON}, can you teach me something new?"
@@ -36,3 +38,6 @@ templates:
     - "No problem {PERSON}, I'm happy to help."
     - "You're welcome."
     - "No problem!"
+
+  utter_spanish_thankyou:
+    - "De nada!"

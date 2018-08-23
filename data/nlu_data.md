@@ -19,4 +19,7 @@
 - thanks
 - thank you
 - I appreciate it
+
+## intent:spanish_yourwelcome
 - gracias
+- muchas gracias
