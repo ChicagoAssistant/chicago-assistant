@@ -45,6 +45,54 @@ Using any of the service codes above, you can see the full details of a service 
 
 As an example, see the details for the pothole request type: http://test311api.cityofchicago.org/open311/v2/services/4fd3b656e750846c53000004.json
 
+Since it doesn't display very nicely in the browser, here is a pretty-fied version of the details for the pothole request:
+
+```
+{
+    "service_code": "4fd3b656e750846c53000004",
+    "attributes": [
+        {
+            "variable": true,
+            "code": "WHEREIST",
+            "datatype": "singlevaluelist",
+            "required": true,
+            "order": 1,
+            "description": "Where is the pothole located?",
+            "values": [
+                {
+                    "key": "BIKE",
+                    "name": "Bike Lane"
+                },
+                {
+                    "key": "CROSS",
+                    "name": "Crosswalk"
+                },
+                {
+                    "key": "CURB",
+                    "name": "Curb Lane"
+                },
+                {
+                    "key": "INTERSEC",
+                    "name": "Intersection"
+                },
+                {
+                    "key": "TRAFFIC",
+                    "name": "Traffic Lane"
+                }
+            ]
+        },
+        {
+            "variable": true,
+            "code": "A511OPTN",
+            "datatype": "string",
+            "required": false,
+            "datatype_description": "Enter number as 999-999-9999",
+            "order": 2,
+            "description": "Input mobile # to opt-in for text updates. If already opted-in, add mobile # to contact info."
+        }
+    ]
+}
+```
 
 Now, in order to submit a request to the server, you need to send a POST request to the test API endpoint above, with the body being json formatted text like this example:  
 
@@ -55,7 +103,7 @@ Now, in order to submit a request to the server, you need to send a POST request
     "WHEREIST": {
       "key": "INTERSEC",
       "name": "Intersection"
-    },
+    }},
     "lat": 41.882785,
     "long": -87.632409,
     "first_name": "FirstName",
@@ -65,7 +113,6 @@ Now, in order to submit a request to the server, you need to send a POST request
     "phone_number": "555-555-5555",
     "description": "I saw a pothole on the street",
     "api_key": "apikey"
-  }
 }
 ```
 

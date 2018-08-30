@@ -1,0 +1,29 @@
+service_codes:
+  building_violation: 4fd3bd72e750846c530000cd
+  restaurant_complaint: 4fd6e4ece750840569000019
+  abandoned_vehicle: 4ffa4c69601827691b000018
+  graffiti_removal: 4fd3b167e750846744000005
+  rodent_baiting_rat_complaint: 4fd3b9bce750846c5300004a
+  sanitation_code_violation: 4fd3b750e750846c5300001d
+  tree_debris: 4fd3bbf8e750846c53000069
+  alley_light_out: 4ffa9cad6018277d4000007b
+  pavement_cave_in_survey: 4ffa971e6018277d4000000b
+  pothole_in_street: 4fd3b656e750846c53000004
+  street_cut_complaints: 4ffa995a6018277d4000003c
+  street_light_out: 4ffa9f2d6018277d400000c8
+  traffic_signal_out: 4ffa9db16018277d400000a2
+
+attributes:
+  pothole_in_street:
+    intersection: {'WHEREIST': {'key': 'INTERSEC', 'name': 'Intersection'}}
+    bike_lane: {'WHEREIST': {'key': 'BIKE', 'name': 'Bike Lane'}}
+    crosswalk: {'WHEREIST': {'key': 'CROSS', 'name': 'Crosswalk'}}
+    curb_lane: {'WHEREIST': {'key': 'CURB', 'name': 'Curb Lane'}}
+    traffic_lane: {'WHEREIST': {'key': 'TRAFFIC', 'name': 'Traffic Lane'}}
+  rodent_baiting_rat_complaint:
+    yes: {'DOYOUWAN': {'key': 'BAITBYAR', 'name': 'Bait Back Yard'}}
+    no: {'DOYOUWAN': {'key': 'NOTOBAIT', 'name': 'No'}}
+  street_light_out:
+    completely_out: {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}}
+    on_and_off: {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}
+  
