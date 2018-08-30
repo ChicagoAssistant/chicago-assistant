@@ -118,4 +118,4 @@ Now, in order to submit a request to the server, you need to send a POST request
 
 The above example demonstrate the format required for the body of the POST request. The post request will be sent using the `http://test311api.cityofchicago.org/open311/v2/requests.json` endpoint.
 
-For a step by step example using Python to submit a request, see [this Jupyter Notebook](https://github.com/ChicagoAssistant/chicago-assistant/blob/dev/requests_311/docs/Example%20-%20Submitting%20a%20Request.ipynb).
+For a step by step example using Python to submit a request, see [this Jupyter Notebook](https://github.com/ChicagoAssistant/chicago-assistant/blob/dev/requests_311/Example%20-%20Submitting%20a%20Request.ipynb).
