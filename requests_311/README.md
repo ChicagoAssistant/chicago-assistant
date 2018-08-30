@@ -1,4 +1,4 @@
-# Submitting 311 Requests via Chicago Assistant
+# Supplemental Documentation for Submitting 311 Requests via Chicago Assistant
 Using the Chicago Assistant, we want to create the ability to submit 311 requests, taking advantage of the [Chicago"s Open 311 capability](http://dev.cityofchicago.org/docs/open311/).
 
 #### Request Types Submittable via Open 311
