@@ -1,0 +1,3 @@
+id,simple_id,client_id,titles,subtitles,short_descriptions,descriptions,status,slug,image,inserted_at,updated_at
+a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13,5,a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12,{"""en""":"""Marion County Auditor's Office"""},{"""en""":"""Manages property tax deductions, city-county accounting"""},{"""en""":"""SHORT DESCRIPTION"""},{"""en""":"""LONG DESCRIPTION"""},kk,kk,kk,4/4/10 00:00:0000,5/5/10 00:00:0000
+a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15,6,a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12,{"""en""":"""Marion County Treasurer's Office"""},{""""en"""":"""Collects, invests property taxes"""},{"""en""":"""SHORT DESCRIPTION"""},{"""en""":"""LONG DESCRIPTION"""},kk,kk,kk,4/4/10 00:00:0000,5/5/10 00:00:0000

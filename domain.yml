@@ -1,0 +1,43 @@
+
+intents:
+  - greet
+  - goodbye
+  - thankyou
+
+actions:
+  - utter_greet
+  - utter_goodbye
+  - utter_youre_welcome
+  - utter_spanish_thankyou
+
+
+entities:
+  - PERSON
+
+slots:
+  PERSON:
+    type: text
+    initial_value: "John"
+
+templates:
+  utter_greet:
+    - "Hi, I'm the Chicago Assistant! You should teach me something new!"
+    - "Hello, {PERSON}, you should teach me something new!"
+    - "Hi {PERSON}, it's great to hear from you!"
+    - "Hey {PERSON}, can you teach me something new?"
+
+  utter_goodbye:
+    - "Bye!"
+    - "I hope you had a good experience today!"
+    - "See you soon!"
+    - "Talk to you later!"
+    - "Goodbye."
+
+  utter_youre_welcome:
+    - "You're welcome, {PERSON}!"
+    - "No problem {PERSON}, I'm happy to help."
+    - "You're welcome."
+    - "No problem!"
+
+  utter_spanish_thankyou:
+    - "De nada!"
