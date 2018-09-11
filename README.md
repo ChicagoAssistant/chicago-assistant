@@ -15,10 +15,11 @@ Docker for Windows requires [Hyper-V](https://docs.microsoft.com/en-us/virtualiz
 To check which version of Windows you have, open the Start Menu and search for **System Information**.
 The **OS Name** field will tell you which version of Windows you have.
 
-If you have **Windows 10 Enterprise/Professional/Education**, you're in luck! Your version of Windows will have Hyper-V.
+
+If you have **Windows 10 Enterprise/Professional/Education**, you're in luck! Your version of Windows has Hyper-V.
 Download [Docker's desktop client](https://docs.docker.com/docker-for-windows/install/) and run the installer, which will enable Hyper-V for you if you haven't already enabled it.
 
-If you have **Windows 10 Home** (like most of us), don't worry! Docker provides a legacy application called **Docker Toolbox**, which runs off of VirtualBox instead.s
+If you have **Windows 10 Home** (like most of us), don't worry! Docker provides a legacy application called **Docker Toolbox**, which runs off of VirtualBox instead.
 Go to the [Docker Toolbox page](https://docs.docker.com/toolbox/toolbox_install_windows/) to download and run the installer, which will also install VirtualBox for you if you need it.
 
 ## Clone Repository
