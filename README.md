@@ -1,6 +1,6 @@
-# Getting Started [Mac OS]
+# Getting Started
 
-## Installing Docker
+## Installing Docker [Mac OS]
 Install Docker  
 
 `brew cask install docker`
@@ -9,6 +9,15 @@ Once it's done installing, open up the application Launcher and start Docker. Yo
 
 **At this time, there is no need to create a Docker ID if you don't have one.**
 
+## Installing Docker [Windows]
+Docker for Windows requires [Hyper-V](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/about/), which **unfortunately isn't available on all versions of Windows**.
+To check which version of Windows you have, open the Start Menu and search for **System Information**. The **OS Name** field will tell you which version of Windows you have.
+
+If you have **Windows 10 Enterprise/Professional/Education**, you're in luck! Your version of Windows will have Hyper-V.
+Download [Docker's desktop client](https://docs.docker.com/docker-for-windows/install/) and run the installer. It will enable Hyper-V for you if you haven't already enabled it.
+
+If you have **Windows 10 Home** (like most of us), don't worry! Docker provides a legacy application called **Docker Toolbox**, which runs off of VirtualBox instead.s
+Go to the [Docker Toolbox page](https://docs.docker.com/toolbox/toolbox_install_windows/) to download and run the installer. It'll also install VirtualBox for you if you need it.
 
 ## Clone Repository
 Open up a **Terminal** and navigate to a folder where you maintain your projects. In my case, I keep my projects in a **Projects** folder within my home directory.
