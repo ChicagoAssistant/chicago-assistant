@@ -26,4 +26,3 @@ attributes:
   street_light_out:
     completely_out: {'ISTHELI2': {'key': 'COMPLETE', 'name': 'Completely Out'}}
     on_and_off: {'ISTHELI2': {'key': 'ONOFF', 'name': 'On and Off'}}
-  
