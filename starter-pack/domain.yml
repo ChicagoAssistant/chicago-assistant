@@ -1,36 +1,65 @@
 intents:
   - greet
   - goodbye
-  - mood_affirm
-  - mood_deny
-  - mood_great
-  - mood_unhappy
+  - confirm
+  - deny
+
+  - potholes
+  - streetlight
+
+  - traffic_light
+  - crosswalk_light
+  - signal_all_out
+  - signal_some_out
+  - signal_flashing
+
+  - light_color
+
+  - coordinates
+  - add_comment
 
 actions:
-- utter_greet
-- utter_cheer_up
-- utter_did_that_help
-- utter_happy
-- utter_goodbye
+  - utter_greet
+  - utter_goodbye
+
+  - utter_description
+  - utter_photo_upload
+  - utter_coordinates
+  - utter_order
+  - utter_confirmation
+  - utter_submission
+
+  - ask_coordinates
+  - confirm_coordinates
+
+  - ask_problem
+  - ask_flashing_light_color
+
+slots:
+  REQUEST_TYPE:
+    type: text
+  REQUEST_DETAIL:
+    type: text
+  LOCATION:
+    type: text
+  LIGHT_COLOR:
+    type: text
 
 templates:
   utter_greet:
   - text: "Hey! How are you?"
-    buttons:
-    - title: "great"
-      payload: "great"
-    - title: "super sad"
-      payload: "super sad"
-
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-  - text: "Did that help you?"
-
-  utter_happy:
-  - text: "Great carry on!"
 
   utter_goodbye:
   - text: "Bye"
+
+  ask_coordinates:
+  - text: "Where is it located?"
+
+  confirm_coordinates:
+  - text: "Just checking, the address is {location}?"
+
+  ask_problem:
+  - text: "What's the problem?"
+
+  ask_flashing_light_color:
+  - text: "What color is the light?"
