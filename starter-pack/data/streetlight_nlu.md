@@ -19,7 +19,7 @@
 - goodevening
 - good afternoon
 
-## intent:alleylight
+## intent:streetlight
 
 - there's a [street light] out (StreetLight)
 - there's a [streetlight] out (StreetLight)
@@ -65,18 +65,6 @@
 ## action:utter_confirmation
 
 - I have that the street light is located in the (Location) at (Coordinates). Is that right?
-
-## action:utter_updates
-
-- Would you like to opt in to text updates about this street light?
-
-## action:utter_updates_confirmed
-
-- Great! What number should we send text updates to?
-
-## action:utter_updates_number_incomplete
-
-- Sorry; I need a 10-digit phone number to send updates. Can you give me your 10-digit phone number?
 
 ## action:utter_updates_number
 
@@ -126,11 +114,3 @@
 - no thank you
 - no thanks
 - no I don't want to
-
-## intent:updates_number
-
-- (PhoneNumber; 10 digits)
-
-## intent:updates_number_incomplete
-
-- (PhoneNumber; < 10 digits)
