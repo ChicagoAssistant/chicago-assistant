@@ -56,7 +56,7 @@ templates:
   - text: "Where is it located?"
 
   confirm_coordinates:
-  - text: "Just checking, the address is {location}?"
+  - text: "Just checking, the address is {LOCATION}?"
 
   ask_problem:
   - text: "What's the problem?"
