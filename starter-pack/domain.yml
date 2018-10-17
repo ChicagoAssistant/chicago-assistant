@@ -19,12 +19,15 @@ intents:
   - add_comment
 
 entities:
+  - NAME
   - REQUEST_TYPE
   - REQUEST_DETAIL
   - LOCATION
   - LIGHT_COLOR
 
 slots:
+  NAME:
+    type: text
   REQUEST_TYPE:
     type: text
   REQUEST_DETAIL:
