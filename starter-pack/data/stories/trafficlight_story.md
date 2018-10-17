@@ -1,6 +1,7 @@
 <!-- All traffic lights are out -->
 ## all_lights_out
-* traffic_light{"request": "traffic_light"}
+* traffic_light[REQUEST_TYPE=traffic_light]
+    - slot{"REQUEST_TYPE": "traffic"}
     - ask_coordinates
 * coordinates
     - confirm_coordinates
