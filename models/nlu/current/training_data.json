@@ -1,0 +1,92 @@
+{
+  "rasa_nlu_data": {
+    "common_examples": [
+      {
+        "intent": "greet",
+        "text": "hi"
+      },
+      {
+        "intent": "greet",
+        "text": "hello"
+      },
+      {
+        "intent": "greet",
+        "entities": [
+          {
+            "start": 15,
+            "end": 19,
+            "value": "Jack",
+            "entity": "PERSON"
+          }
+        ],
+        "text": "hi, my name is Jack"
+      },
+      {
+        "intent": "greet",
+        "entities": [
+          {
+            "start": 18,
+            "end": 22,
+            "value": "Jack",
+            "entity": "PERSON"
+          }
+        ],
+        "text": "hello, my name is Jack"
+      },
+      {
+        "intent": "greet",
+        "text": "hey"
+      },
+      {
+        "intent": "goodbye",
+        "text": "Bye"
+      },
+      {
+        "intent": "goodbye",
+        "text": "goodbye"
+      },
+      {
+        "intent": "goodbye",
+        "text": "peace"
+      },
+      {
+        "intent": "goodbye",
+        "text": "later"
+      },
+      {
+        "intent": "goodbye",
+        "text": "see you later"
+      },
+      {
+        "intent": "goodbye",
+        "text": "see you soon"
+      },
+      {
+        "intent": "thankyou",
+        "text": "Thank you!"
+      },
+      {
+        "intent": "thankyou",
+        "text": "thanks"
+      },
+      {
+        "intent": "thankyou",
+        "text": "thank you"
+      },
+      {
+        "intent": "thankyou",
+        "text": "I appreciate it"
+      },
+      {
+        "intent": "spanish_yourwelcome",
+        "text": "gracias"
+      },
+      {
+        "intent": "spanish_yourwelcome",
+        "text": "muchas gracias"
+      }
+    ],
+    "regex_features": [],
+    "entity_synonyms": []
+  }
+}
