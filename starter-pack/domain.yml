@@ -15,7 +15,7 @@ intents:
 
   - light_color
 
-  - coordinates
+  - location
   - add_comment
 
 entities:
@@ -43,13 +43,13 @@ actions:
 
   - utter_description
   - utter_photo_upload
-  - utter_coordinates
+  - utter_location
   - utter_order
   - utter_confirmation
   - utter_submission
 
-  - ask_coordinates
-  - confirm_coordinates
+  - ask_location
+  - confirm_location
 
   - ask_problem
   - ask_flashing_light_color
@@ -62,11 +62,12 @@ templates:
   utter_goodbye:
   - text: "Bye"
 
-  ask_coordinates:
+  ask_location:
   - text: "Where is it located?"
 
-  confirm_coordinates:
+  confirm_location:
   - text: "Just checking, the address is {LOCATION}?"
+  - text: "To confirm, the address is {LOCATION}?"
 
   ask_problem:
   - text: "What's the problem?"
