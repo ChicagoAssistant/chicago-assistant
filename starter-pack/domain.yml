@@ -67,6 +67,7 @@ templates:
 
   confirm_location:
   - text: "Just checking, the address is {LOCATION}?"
+  - text: "To confirm, the address is {LOCATION}?"
 
   ask_problem:
   - text: "What's the problem?"

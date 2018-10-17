@@ -1,7 +1,7 @@
 <!-- All traffic lights are out -->
+<!-- slot{"REQUEST_TYPE": "traffic_light"} -->
 ## all_lights_out
 * traffic_light{"REQUEST_TYPE": "traffic_light"}
-    - slot{"REQUEST_TYPE": "traffic_light"}
     - ask_location
 * location{"LOCATION": "123 Main St"}
     - confirm_location
