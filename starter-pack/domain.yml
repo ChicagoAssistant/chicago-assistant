@@ -18,6 +18,22 @@ intents:
   - coordinates
   - add_comment
 
+entities:
+  - REQUEST_TYPE
+  - REQUEST_DETAIL
+  - LOCATION
+  - LIGHT_COLOR
+
+slots:
+  REQUEST_TYPE:
+    type: text
+  REQUEST_DETAIL:
+    type: text
+  LOCATION:
+    type: text
+  LIGHT_COLOR:
+    type: text
+
 actions:
   - utter_greet
   - utter_goodbye
@@ -34,16 +50,6 @@ actions:
 
   - ask_problem
   - ask_flashing_light_color
-
-slots:
-  REQUEST_TYPE:
-    type: text
-  REQUEST_DETAIL:
-    type: text
-  LOCATION:
-    type: text
-  LIGHT_COLOR:
-    type: text
 
 templates:
   utter_greet:
