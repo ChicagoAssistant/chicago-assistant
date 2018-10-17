@@ -1,3 +1,8 @@
+## intent:location
+- it's at [123 Main St](LOCATION)
+- it's located at [456 Side Rd](LOCATION)
+- [321 Side Rd](LOCATION)
+
 ## intent:traffic_light
 - report a problem with a [traffic light](REQUEST_TYPE)
 - there's a problem with a [traffic light](REQUEST_TYPE)
