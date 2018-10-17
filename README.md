@@ -25,15 +25,13 @@ The project aims to improve ease of accessibility to city services and informati
 
  - [Trello Board](https://trello.com/b/6EPQugQN/chicago-virtual-assistant)
  - [Google Drive](https://drive.google.com/drive/u/0/folders/1DqmKrKWWF3-UyAipF8fifp9cPf-4Dn4S)
- - []
 
 #### Learning to Build Conversation Interfaces
-The learning curve for building conversational interfaces can be a steep. We have been curating a [Get Started][https://docs.google.com/document/d/1x4VDO_P0xF3DU7roLi8Uey2zNs308GA9i625JU1c_oE/edit?usp=drive_web&ouid=109439844092806383542** document that covers our groups mission in addition to pointing you to helpful resources for learning about conversational interfaces. 
+The learning curve for building conversational interfaces can be a steep. We have been curating a [Get Started](https://docs.google.com/document/d/1x4VDO_P0xF3DU7roLi8Uey2zNs308GA9i625JU1c_oE/edit?usp=drive_web&ouid=109439844092806383542**) document that covers our groups mission in addition to pointing you to helpful resources for learning about conversational interfaces. 
 **Helpful Learning Resources***
  - Read - [Rasa Documentation](https://www.rasa.com/docs/nlu)
  - Watch - [Helpful Technical Video](https://www.youtube.com/watch?v=zRqjH7fT0G0)
  - Listen - [DataFramed Podcast Interview with Rasa Founder](https://www.datacamp.com/community/podcast/chatbots)
-
 
 
 # Getting Started [Mac OS]
