@@ -57,6 +57,7 @@ actions:
 templates:
   utter_greet:
   - text: "Hey! How are you?"
+  - text: "Hello, how can I help out today?"
 
   utter_goodbye:
   - text: "Bye"
@@ -72,3 +73,6 @@ templates:
 
   ask_flashing_light_color:
   - text: "What color is the light?"
+
+  ask_coordinates_alley_light:
+  - text: "Where is the alley light located?"
