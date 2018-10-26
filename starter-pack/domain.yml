@@ -60,7 +60,7 @@ templates:
   - text: "Hello, how can I help out today?"
 
   utter_goodbye:
-  - text: "Bye"
+  - text: "Thank you for using Chi Virtual Assistant. Goodbye!"
 
   ask_location:
   - text: "Where is it located?"
@@ -75,5 +75,17 @@ templates:
   ask_flashing_light_color:
   - text: "What color is the light?"
 
-  ask_coordinates_alley_light:
-  - text: "Where is the alley light located?"
+  ask_alley_light_description:
+  - text: "Is the alley light directly behind this address?"
+
+  ask_alley_light_photo_upload:
+  - text: "Would you like to upload a photo of the alley light?"
+
+  utter_confirmation:
+  - text: "Would you like us to submit your 311 order request for the {REQUEST_TYPE} located at {LOCATION}?"
+
+  utter_submission_anything_else:
+  - text: "We have submitted your 311 request; thanks! Is there anything else I can help out with?"
+
+
+
