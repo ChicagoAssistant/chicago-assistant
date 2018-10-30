@@ -17,21 +17,21 @@
 - good afternoon
 
 ## intent:pothole
-- there's a [pothole] (Pothole)
-- there's a [hole] (Pothole)
-- I found a [pothole] (Pothole)
-- There's a [hole] in the [street] (Location)
-- [pothole] in the [bike lane] (Location)
-- [pothole] in the [crosswalk] (Location)
-- [pothole] in the [walkway] (LocationCrosswalk)
-- [pothole] in the [curb lane] (Location)
-- [pothole] in the [right hand lane] (LocationCurbLane)
-- [pothole] in the [intersection] (Location)
-- [pothole] in the [traffic lane] (Location)
-- [pothole] in the [left hand lane] (Location)
-- potthole
-- pothole
-- pott hole
+- there's a [pothole] (REQUEST_TYPE)
+- there's a [hole] (REQUEST_TYPE)
+- I found a [pothole] (REQUEST_TYPE)
+- There's a [hole] in the street (REQUEST_TYPE)
+- [pothole] in the bike lane (REQUEST_TYPE)
+- [pothole] in the crosswalk (REQUEST_TYPE)
+- [pothole] in the walkway (REQUEST_TYPE)
+- [pothole] in the curb lane (REQUEST_TYPE)
+- [pothole] in the right hand lane (REQUEST_TYPE)
+- [pothole] in the intersection (REQUEST_TYPE)
+- [pothole] in the traffic lane (REQUEST_TYPE)
+- [pothole] in the left hand lane (REQUEST_TYPE)
+- [potthole] (REQUEST_TYPE)
+- [pothole] (REQUEST_TYPE)
+- [pott hole] (REQUEST_TYPE)
 
 ## action:utter_pothole_description
 - Can you tell me what part of the street the pothole is located in?
