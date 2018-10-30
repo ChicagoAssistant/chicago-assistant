@@ -33,8 +33,21 @@
 - pothole
 - pott hole
 
-## action:utter_description
+## action:utter_pothole_description
 - Can you tell me what part of the street the pothole is located in?
+
+## intent:pothole_description
+- in the [bike lane] (REQUEST_DETAIL)
+- in the [bikelane] (REQUEST_DETAIL)
+- in the [crosswalk] (REQUEST_DETAIL)
+- in the [cross walk] (REQUEST_DETAIL)
+- in the [curb lane] (REQUEST_DETAIL)
+- near the [curb] (REQUEST_DETAIL)
+- in the [intersection] (REQUEST_DETAIL)
+- in the [traffic lane] (REQUEST_DETAIL)
+- in the [trafficlane] (REQUEST_DETAIL)
+- in the [middle of the street] (REQUEST_DETAIL)
+- in the [middle lane] (REQUEST_DETAIL)
 
 ## action:utter_photo_upload
 - Would you like to upload a photo of the pothole?

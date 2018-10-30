@@ -87,5 +87,7 @@ templates:
   utter_submission_anything_else:
   - text: "We have submitted your 311 request; thanks! Is there anything else I can help out with?"
 
+  utter_photo_upload:
+  - text: "Would you like to upload a photo of it?"
 
 
