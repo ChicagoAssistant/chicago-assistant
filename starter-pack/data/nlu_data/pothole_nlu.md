@@ -1,4 +1,4 @@
-## action:utter_greet
+<!-- ## action:utter_greet
 - Hello, how can I help out today?
 
 ## intent:greet
@@ -15,40 +15,44 @@
 - goodmorning
 - goodevening
 - good afternoon
+-->
 
 ## intent:pothole
-- there's a [pothole] (REQUEST_TYPE)
-- there's a [hole] (REQUEST_TYPE)
-- I found a [pothole] (REQUEST_TYPE)
-- There's a [hole] in the street (REQUEST_TYPE)
-- [pothole] in the bike lane (REQUEST_TYPE)
-- [pothole] in the crosswalk (REQUEST_TYPE)
-- [pothole] in the walkway (REQUEST_TYPE)
-- [pothole] in the curb lane (REQUEST_TYPE)
-- [pothole] in the right hand lane (REQUEST_TYPE)
-- [pothole] in the intersection (REQUEST_TYPE)
-- [pothole] in the traffic lane (REQUEST_TYPE)
-- [pothole] in the left hand lane (REQUEST_TYPE)
-- [potthole] (REQUEST_TYPE)
-- [pothole] (REQUEST_TYPE)
-- [pott hole] (REQUEST_TYPE)
+- there's a [pothole](REQUEST_TYPE)
+- there's a [hole](REQUEST_TYPE:pothole)
+- I found a [pothole](REQUEST_TYPE)
+- There's a [hole](REQUEST_TYPE:pothole) in the street
+- [pothole](REQUEST_TYPE) in the bike lane
+- [pothole](REQUEST_TYPE) in the crosswalk
+- [pothole](REQUEST_TYPE) in the walkway
+- [pothole](REQUEST_TYPE) in the curb lane
+- [pothole](REQUEST_TYPE) in the right hand lane
+- [pothole](REQUEST_TYPE) in the intersection
+- [pothole](REQUEST_TYPE) in the traffic lane
+- [pothole](REQUEST_TYPE) in the left hand lane
+- [potthole](REQUEST_TYPE:pothole)
+- [pothole](REQUEST_TYPE)
+- [pott hole](REQUEST_TYPE:pothole)
 
+<!--
 ## action:utter_pothole_description
 - Can you tell me what part of the street the pothole is located in?
+-->
 
 ## intent:pothole_description
-- in the [bike lane] (REQUEST_DETAIL)
-- in the [bikelane] (REQUEST_DETAIL)
-- in the [crosswalk] (REQUEST_DETAIL)
-- in the [cross walk] (REQUEST_DETAIL)
-- in the [curb lane] (REQUEST_DETAIL)
-- near the [curb] (REQUEST_DETAIL)
-- in the [intersection] (REQUEST_DETAIL)
-- in the [traffic lane] (REQUEST_DETAIL)
-- in the [trafficlane] (REQUEST_DETAIL)
-- in the [middle of the street] (REQUEST_DETAIL)
-- in the [middle lane] (REQUEST_DETAIL)
+- in the [bike lane](REQUEST_DETAIL)
+- in the [bikelane](REQUEST_DETAIL)
+- in the [crosswalk](REQUEST_DETAIL)
+- in the [cross walk](REQUEST_DETAIL)
+- in the [curb lane](REQUEST_DETAIL)
+- near the [curb](REQUEST_DETAIL)
+- in the [intersection](REQUEST_DETAIL)
+- in the [traffic lane](REQUEST_DETAIL)
+- in the [trafficlane](REQUEST_DETAIL)
+- in the [middle of the street](REQUEST_DETAIL)
+- in the [middle lane](REQUEST_DETAIL)
 
+<!--
 ## action:utter_photo_upload
 - Would you like to upload a photo of the pothole?
 
@@ -106,5 +110,4 @@
 - no thank you
 - no thanks
 - no I don't want to
-
-
+-->

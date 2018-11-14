@@ -9,17 +9,17 @@ intents:
   - location
   - add_comment
 
-  # Request intents
+  # Type-of-request intents
   - potholes_request
   - streetlight_request
   - traffic_light_request
-  - crosswalk_light_request
   - rodent_request
 
-  # Rodent request-related intents
+  # Specific rodent request intents
   - rodent_description
 
-  # Traffic light request-related intents
+  # Specific traffic signal request intents
+  - crosswalk_light_out
   - signal_all_out
   - signal_some_out
   - signal_flashing
@@ -37,14 +37,27 @@ entities:
 slots:
   NAME:
     type: text
+
   REQUEST_TYPE:
-    type: text
+    type: categorical
+    values:
+    - traffic_signal
+    - pothole
+    - streetlight
+    - rodent
+
   REQUEST_DETAIL:
     type: text
+
   LOCATION:
     type: text
+
   LIGHT_COLOR:
-    type: text
+    type: categorical
+    values:
+    - red
+    - yellow
+    - green
 
 # ------------------------------------------------------------------------------
 actions:
@@ -54,24 +67,28 @@ actions:
 
   # Descriptive actions (only prints text)
   - utter_description
-  - utter_photo_upload
   - utter_submission
-  - ask_another_request
 
   # Querying actions (asks for info from the user)
-  - ask_confirmation
-  - ask_location
-  - ask_problem
-  - ask_rodent_description
+  - utter_ask_another_request
+  - utter_ask_photo_upload
+  - utter_ask_confirmation
+  - utter_ask_location
+  - utter_ask_problem
+  - utter_ask_rodent_description
 
   # Confirmation actions (confirms info received from the user)
   - confirm_location
 
+  # Pothole request-related actions
+  - utter_ask_pothole_description
+
   # Traffic light request-related actions
-  - ask_flashing_light_color
+  - utter_ask_flashing_light_color
 
 # ------------------------------------------------------------------------------
 templates:
+# Casual actions
   # Greet the user
   utter_greet:
   - text: "Hey! How are you?"
@@ -81,56 +98,60 @@ templates:
   utter_goodbye:
   - text: "Thank you for using Chi Virtual Assistant. Goodbye!"
 
-  # comment
-  utter_description:
-  - text: "undefined"
 
-  # comment
-  utter_photo_upload:
-  - text: "undefined"
+# Descriptive actions (only prints text)
+  # utter_description:
+  # - text: "undefined"
 
   # Tell the user their request has been submitted
   utter_submission:
   - text: "We have submitted your 311 request. Thanks!"
 
+
+# Querying actions (asks for info from the user)
   # Ask the user if they have another request
-  ask_another_request:
+  utter_ask_another_request:
   - text: "Is there anything else I can help out with?"
 
+  # Ask if the user wants to upload a photo
+  utter_ask_photo_upload: 
+  - text: "Would you like to upload a photo?"
+  - text: "Would you like to upload a photo of it?"
+
   # Confirm the request with the user
-  ask_confirmation:
+  utter_ask_confirmation: 
   - text: "Would you like us to submit your 311 order request for the {REQUEST_TYPE} located at {LOCATION}?"
 
   # Ask the user for the request location
-  ask_location:
+  utter_ask_location:
   - text: "Where is it located?"
 
+  # ask_problem:
+  # - text: "What's the problem?"
+
+  # utter_ask_rodent_description:
+  # - text: "undefined"
+
+
+# Confirmation actions (confirms info received from the user)
   # Confirm the location with the user
   confirm_location:
   - text: "Just checking, the address is {LOCATION}?"
   - text: "To confirm, the address is {LOCATION}?"
 
 
+# Pothole request-related actions
+  utter_ask_pothole_description:
+  - text: "Can you tell me what part of the street the pothole is located in?"
 
 
-
-
-
-  ask_problem:
-  - text: "What's the problem?"
-
-  ask_flashing_light_color:
+# Traffic light request-related actions
+  utter_ask_flashing_light_color:
   - text: "What color is the light?"
 
-  ask_alley_light_description:
-  - text: "Is the alley light directly behind this address?"
 
-  ask_alley_light_photo_upload:
-  - text: "Would you like to upload a photo of the alley light?"
+######################### WORK IN PROGRESS #####################################
 
 
-
-  utter_photo_upload:
-  - text: "Would you like to upload a photo of it?"
-
-
+  # ask_alley_light_description:
+  # - text: "Is the alley light directly behind this address?"

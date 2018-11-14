@@ -1,5 +1,4 @@
 ## intent:greet
-
 - hey
 - hello
 - hi
@@ -24,7 +23,6 @@
 - goodmorn
 
 ## intent:goodbye
-
 - cu
 - good by
 - cee you later
@@ -38,7 +36,6 @@
 - see you later
 
 ## intent:confirm
-
 - yes
 - indeed
 - of course
@@ -48,7 +45,6 @@
 - correct
 
 ## intent:deny
-
 - no
 - nope
 - that's not it

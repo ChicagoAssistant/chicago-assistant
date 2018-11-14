@@ -12,6 +12,7 @@
 - I want my street [rodent bait](REQUEST_TYPE:rodent) baited
 
 
+<!--
 ## action:utter_description
 
 - can you describe the rat’s appearance? (size, shape, color)
@@ -20,9 +21,9 @@
 ## action:utter_backyard
 
 - do you want your backyard baited?
+-->
 
 ## intent:utter_backyard
-
 - Back Yard Bait
 - No
 - Yes
@@ -40,6 +41,7 @@
 - no need
 - no thanks
 
+<!--
 ## action:utter_photo_upload
 
 - would you like to upload a photo of the rat?
@@ -49,9 +51,9 @@
 - where did you see it?
 - where was it coming from?
 - where was it going to?
+-->
 
 ## intent:direction_description
-
 - at [Location]
 - on [Coordinates]
 - left
@@ -68,6 +70,7 @@
 - up the wall
 - up the wall of [Location]
 
+<!--
 ## action:utter_order
 
 - submit 311 order request?
@@ -139,3 +142,4 @@
 - bye
 - bye bye
 - peace
+-->

@@ -1,16 +1,18 @@
 ## intent:traffic_light_request
-- report a problem with a [traffic light](REQUEST_TYPE)
-- there's a problem with a [traffic light](REQUEST_TYPE)
-- noticed a [traffic light](REQUEST_TYPE) problem
-- [traffic light](REQUEST_TYPE) is broken
-- [traffic light](REQUEST_TYPE) isn't working
+- report a problem with a [traffic light](REQUEST_TYPE:traffic_signal)
+- there's a problem with a [traffic light](REQUEST_TYPE:traffic_signal)
+- noticed a [traffic light](REQUEST_TYPE:traffic_signal) problem
+- [traffic light](REQUEST_TYPE:traffic_signal) is broken
+- [traffic light](REQUEST_TYPE:traffic_signal) isn't working
 
-## intent:crosswalk_light_request
-- report a problem with a [crosswalk light](REQUEST_TYPE)
-- there's a problem with a [crosswalk light](REQUEST_TYPE)
-- noticed a [crosswalk light](REQUEST_TYPE) problem
-- [crosswalk light](REQUEST_TYPE) is broken
-- [crosswalk light](REQUEST_TYPE) isn't working
+<!-- Can you have two slots filled within the same intent?? -->
+## intent:crosswalk_light_out
+- report a problem with a [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out)
+- there's a problem with a [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out)
+- noticed a [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out) problem
+- [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out) is broken
+- [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out) isn't working
+- the [crosswalk light](REQUEST_TYPE:traffic_signal)(REQUEST_DETAIL:crosswalk_out) is out
 
 ## intent:signal_all_out
 - traffic light is out
