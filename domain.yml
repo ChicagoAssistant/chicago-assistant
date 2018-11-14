@@ -5,11 +5,16 @@ intents:
   - thankyou
 
 actions:
+  - requests_311.actions.PotholeRequestForm
+  - pothole_request_form
   - utter_greet
   - utter_goodbye
   - utter_youre_welcome
-  - utter_spanish_thankyou
-
+  - utter_ask_description
+  - utter_ask_pothole_location
+  - utter_ask_location
+  - utter_location_confirmation
+  - utter_comfirm_submission
 
 entities:
   - PERSON
@@ -18,6 +23,19 @@ slots:
   PERSON:
     type: text
     initial_value: "John"
+  location:
+    type: text
+  description:
+    type: text
+  pothole_location:
+    type: categorical
+    values:
+      - BIKE
+      - INTERSEC
+      - CROSS
+      - CURB
+      - TRAFFIC
+
 
 templates:
   utter_greet:
@@ -25,6 +43,7 @@ templates:
     - "Hello, {PERSON}, you should teach me something new!"
     - "Hi {PERSON}, it's great to hear from you!"
     - "Hey {PERSON}, can you teach me something new?"
+    - "Hello, how can I help out today?"
 
   utter_goodbye:
     - "Bye!"
@@ -39,5 +58,17 @@ templates:
     - "You're welcome."
     - "No problem!"
 
-  utter_spanish_thankyou:
-    - "De nada!"
+  utter_ask_pothole_location:
+    - "Can you tell me what part of the street the pothole is located in?"
+
+  utter_ask_location:
+    - "Where is the pothole located?"
+
+  utter_ask_description:
+    - "Can you tell me more?"
+
+  utter_location_confirmation:
+    - "I have that the pothole is located at {LOCATION}. Is that right?"
+
+  utter_comfirm_submission:
+    - "We have submitted your 311 request. Thank you! Is there anything else I can help you with?"

@@ -8,10 +8,10 @@ help:
 
 train-nlu:
 	python -m rasa_nlu.train -c nlu_config.yml --fixed_model_name current \
-	       --data ./data/nlu_data.md --path models/ --project nlu
+	       --data ./data/nlu_data/ --path models/ --project nlu
 
 train-core:
-	python -m rasa_core.train -s data/stories.md -d domain.yml -o models/dialogue --epochs 300
+	python -m rasa_core.train -s data/stories/ -d domain.yml -o models/dialogue -c nlu_config.yml
 
 run-fb:
 	python -m rasa_core.run -d models/dialogue -u models/nlu/current -p 5002 -c facebook --credentials fb_credentials.yml

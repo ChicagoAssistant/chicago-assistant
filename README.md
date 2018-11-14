@@ -5,7 +5,7 @@ The Chicago Assistant is a text and voice interface for requesting and inquiring
  - Get transit arrival times and station accessibility information
  - Request information about common city services such as getting a vehicle city sticker, school closures, street cleaning schedules, etc.
  - Contacting your alderman
- - Got an idea? [Share it with us!](google.com)
+ - Got an idea? [Share it with us!](mailto:vidal.anguiano@gmail.com)
 
 The text and voice interface will be accessible via SMS, popular messaging platforms like Facebook Messenger and voice interfaces like Amazon Alexa and Google Assistant.
 
@@ -36,7 +36,7 @@ The learning curve for building conversational interfaces can be a steep. We hav
 # Getting Started [Mac OS]
 
 ## Installing Docker
-Install Docker  
+Install Docker
 
 `brew cask install docker`
 
