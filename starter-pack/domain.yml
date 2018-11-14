@@ -1,30 +1,39 @@
 intents:
+  # Generic casual intents (used by more than 1 request)
   - greet
   - goodbye
   - confirm
   - deny
 
-  - potholes
-  - streetlight
-
-  - traffic_light
-  - crosswalk_light
-  - signal_all_out
-  - signal_some_out
-  - signal_flashing
-
-  - light_color
-
+  # Generic business intents (used by more than 1 request)
   - location
   - add_comment
 
-entities:
-  - NAME
-  - REQUEST_TYPE
-  - REQUEST_DETAIL
-  - LOCATION
-  - LIGHT_COLOR
+  # Request intents
+  - potholes_request
+  - streetlight_request
+  - traffic_light_request
+  - crosswalk_light_request
+  - rodent_request
 
+  # Rodent request-related intents
+  - rodent_description
+
+  # Traffic light request-related intents
+  - signal_all_out
+  - signal_some_out
+  - signal_flashing
+  - light_color
+
+# ------------------------------------------------------------------------------
+entities:
+  - NAME           # Name of user
+  - REQUEST_TYPE   # Type of request
+  - REQUEST_DETAIL # Details of the request
+  - LOCATION       # Location of the request
+  - LIGHT_COLOR    # Trafffic light color (specific to traffic light request)
+
+# ------------------------------------------------------------------------------
 slots:
   NAME:
     type: text
@@ -37,37 +46,75 @@ slots:
   LIGHT_COLOR:
     type: text
 
+# ------------------------------------------------------------------------------
 actions:
+  # Casual actions
   - utter_greet
   - utter_goodbye
 
+  # Descriptive actions (only prints text)
   - utter_description
   - utter_photo_upload
-  - utter_location
-  - utter_order
-  - utter_confirmation
   - utter_submission
+  - ask_another_request
 
+  # Querying actions (asks for info from the user)
+  - ask_confirmation
   - ask_location
+  - ask_problem
+  - ask_rodent_description
+
+  # Confirmation actions (confirms info received from the user)
   - confirm_location
 
-  - ask_problem
+  # Traffic light request-related actions
   - ask_flashing_light_color
 
+# ------------------------------------------------------------------------------
 templates:
+  # Greet the user
   utter_greet:
   - text: "Hey! How are you?"
   - text: "Hello, how can I help out today?"
 
+  # Say goodbye to the user
   utter_goodbye:
   - text: "Thank you for using Chi Virtual Assistant. Goodbye!"
 
+  # comment
+  utter_description:
+  - text: "undefined"
+
+  # comment
+  utter_photo_upload:
+  - text: "undefined"
+
+  # Tell the user their request has been submitted
+  utter_submission:
+  - text: "We have submitted your 311 request. Thanks!"
+
+  # Ask the user if they have another request
+  ask_another_request:
+  - text: "Is there anything else I can help out with?"
+
+  # Confirm the request with the user
+  ask_confirmation:
+  - text: "Would you like us to submit your 311 order request for the {REQUEST_TYPE} located at {LOCATION}?"
+
+  # Ask the user for the request location
   ask_location:
   - text: "Where is it located?"
 
+  # Confirm the location with the user
   confirm_location:
   - text: "Just checking, the address is {LOCATION}?"
   - text: "To confirm, the address is {LOCATION}?"
+
+
+
+
+
+
 
   ask_problem:
   - text: "What's the problem?"
@@ -81,11 +128,7 @@ templates:
   ask_alley_light_photo_upload:
   - text: "Would you like to upload a photo of the alley light?"
 
-  utter_confirmation:
-  - text: "Would you like us to submit your 311 order request for the {REQUEST_TYPE} located at {LOCATION}?"
 
-  utter_submission_anything_else:
-  - text: "We have submitted your 311 request; thanks! Is there anything else I can help out with?"
 
   utter_photo_upload:
   - text: "Would you like to upload a photo of it?"

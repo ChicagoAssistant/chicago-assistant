@@ -1,25 +1,4 @@
-## action:utter_greet
-
-- Hello, how can I help out today?
-
-## intent:greet
-
-- hey
-- hello
-- hi
-- Hi!
-- hello there
-- good morning
-- good evening
-- moin
-- hey there
-- let's go
-- hey dude
-- goodmorning
-- goodevening
-- good afternoon
-
-## intent:streetlight
+## intent:streetlight_request
 
 - there's a [street light] out (StreetLight)
 - there's a [streetlight] out (StreetLight)

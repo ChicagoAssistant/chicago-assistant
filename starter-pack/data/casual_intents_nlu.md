@@ -10,11 +10,18 @@
 - good evening
 - moin
 - hey there
-- let's go
 - hey dude
 - goodmorning
 - goodevening
 - good afternoon
+- hai
+- yo
+- sup
+- godmorning
+- goodmorning
+- god morning
+- goodmrn
+- goodmorn
 
 ## intent:goodbye
 

@@ -1,7 +1,6 @@
 <!-- All traffic lights are out -->
-<!-- slot{"REQUEST_TYPE": "traffic_light"} -->
 ## all_lights_out
-* traffic_light{"REQUEST_TYPE": "traffic_light"}
+* traffic_light_request
     - ask_location
 * location{"LOCATION": "123 Main St"}
     - confirm_location
@@ -14,9 +13,9 @@
 
 <!-- Some traffic lights are out -->
 ## some_lights_out
-* traffic_light
+* traffic_light_request
     - ask_location
-* location
+* location{"LOCATION": "456 Example Rd"}
     - confirm_location
     - ask_problem
 * signal_some_out
@@ -27,13 +26,13 @@
 
 <!-- Traffic lights are flashing -->
 ## lights_flashing
-* traffic_light
+* traffic_light_request
     - ask_problem
 * signal_flashing
     - ask_flashing_light_color
 * light_color
     - ask_location
-* location
+* location{"LOCATION": "321 Somewhere Ave"}
     - confirm_location
 * confirm
     - utter_confirmation

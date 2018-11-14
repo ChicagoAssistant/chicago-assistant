@@ -1,44 +1,16 @@
-## action:utter_greet
+## intent:rodent_request
+- there are [rats](REQUEST_TYPE:rodent) on my street
+- there are [rodents](REQUEST_TYPE:rodent) on my street
+- there are [mice](REQUEST_TYPE:rodent) on my street
+- I saw a [rat](REQUEST_TYPE:rodent) on my street
+- I just saw [rodents](REQUEST_TYPE:rodent) on my street
+- I saw a [mouse](REQUEST_TYPE:rodent) running on my street
+- I saw some [rats](REQUEST_TYPE:rodent) at [123 Main St](LOCATION)
+- there was a [rodent](REQUEST_TYPE) at [456 That Rd](LOCATION)
+- I want to [bait](REQUEST_TYPE:rodent) my street
+- I want to put [rodent bait](REQUEST_TYPE:rodent) on my street
+- I want my street [rodent bait](REQUEST_TYPE:rodent) baited
 
-- hello, how are you
-
-## intent:greet
-
-- hey
-- hello
-- hi
-- hello there
-- good morning
-- good afternoon
-- hai
-- let’s go
-- hey dude
-- dude
-- yo
-- sup
-- godmorning
-- goodmorning
-- god morning
-- goodmrn
-- goodmorn
-
-## intent:report_rat_sighting
-
-- [rat] in [location]
-- [rat] on [Coordinates]
-- Eek! I see a [rat]
-- Ahh! I see a [rat]
-- I see a [rat] in [Location]
-- I see a [rat] on [Coordinates]
-- I saw a [rat] in [Location]
-- I saw a [rat] on [Coordinates]
-- I saw a rat running in [Location]
-- I saw a rat running on [Coordinates]
-- Omg! I just saw a [rat]
-- Omg I just saw a [rat] on [Coordinates]
-- Omg I just saw a [rat] in the [Location]
-- Omg I just saw a [adjective][rat] on [Coordinates]
-- Omg I just saw a [adjective][rat] in [Location]
 
 ## action:utter_description
 
