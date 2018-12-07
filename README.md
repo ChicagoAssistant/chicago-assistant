@@ -1,20 +1,20 @@
 # Chicago Assistant
 
-The Chicago Assistant is a text and voice interface for requesting city services and making inquires about city services. Functionalities we are currently building include:
+The Chicago Assistant is a text and voice interface for requesting and inquiring about city services. Functionalities we are currently exploring include:
  - Submit 311 Service Requests
  - Get transit arrival times and station accessibility information
  - Request information about common city services such as getting a vehicle city sticker, school closures, street cleaning schedules, etc.
  - Contacting your alderman
  - Got an idea? [Share it with us!](google.com)
 
-The text and voice interface could be integrated with popular messaging platforms like Facebook Messenger and popular voice interfaces like Amazon Alexa and Google Assistant. The project aims to improve ease of accessibility to city services and information about city services by creating a text and voice channel to compliment existing web and telephone (311) channels.
+The text and voice interface will be accessible via SMS, popular messaging platforms like Facebook Messenger and voice interfaces like Amazon Alexa and Google Assistant.
+
+The project aims to improve ease of accessibility to city services and information about city services by creating a text and voice channel, complimenting existing web and telephone (311) channels.
 
 **Depricated Prototype:** http://chicago-assistant-depricated.herokuapp.com/
 
-#### Current Functionality in Development
- - Submit a pothole request
- - Submit a broken street light request
- - Submit a request for rodent baiting
+### Current Functionality in Development
+ - Submit 311 Requests
 
 #### Join Us on Tuesdays at Chi Hack Night
 []**Slack Channel**](https://chihacknight.slack.com/) #chivirtualassistant
@@ -23,6 +23,18 @@ The text and voice interface could be integrated with popular messaging platform
 [Google Drive](https://drive.google.com/drive/u/1/folders/1DqmKrKWWF3-UyAipF8fifp9cPf-4Dn4S)  
 [Trello Board](https://trello.com/b/6EPQugQN/chicago-virtual-assistant)
 
+### Join Us
+ - [Chi Hack Night Slack](http://slackme.chihacknight.org/) Channel: #chivirtualassistant
+ - [Trello Board](https://trello.com/b/6EPQugQN/chicago-virtual-assistant)
+ - [Google Drive](https://drive.google.com/drive/u/0/folders/1DqmKrKWWF3-UyAipF8fifp9cPf-4Dn4S)
+
+### Learning to Build Conversation Interfaces
+The learning curve for building conversational interfaces can be a steep. We have been curating a [Get Started](https://docs.google.com/document/d/1x4VDO_P0xF3DU7roLi8Uey2zNs308GA9i625JU1c_oE/edit?usp=drive_web&ouid=109439844092806383542**) document that covers our groups mission in addition to pointing you to helpful resources for learning about conversational interfaces.  
+
+**Helpful Learning Resources**
+- Read - [Rasa Documentation](https://www.rasa.com/docs/nlu)
+ - Watch - [Helpful Technical Video](https://www.youtube.com/watch?v=zRqjH7fT0G0)
+ - Listen - [DataFramed Podcast Interview with Rasa Founder](https://www.datacamp.com/community/podcast/chatbots)
 
 
 # Getting Started
