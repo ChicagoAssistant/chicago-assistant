@@ -1,34 +1,37 @@
 # Chicago Assistant
 
-The Chicago Assistant is a text and voice interface for requesting city services and making inquires about city services. Functionalities we are currently exploring include:
+The Chicago Assistant is a text and voice interface for requesting city services and making inquires about city services. Functionalities we are currently building include:
  - Submit 311 Service Requests
  - Get transit arrival times and station accessibility information
  - Request information about common city services such as getting a vehicle city sticker, school closures, street cleaning schedules, etc.
  - Contacting your alderman
  - Got an idea? [Share it with us!](google.com)
 
-The text and voice interface could be integrated with popular messaging platforms like Facebook Messenger and popular voice interfaces like Amazon Alexa and Google Assistant.
-
-The project aims to improve ease of accessibility to city services and information about city services by creating a text and voice channel to compliment existing web and telephone (311) channels.
+The text and voice interface could be integrated with popular messaging platforms like Facebook Messenger and popular voice interfaces like Amazon Alexa and Google Assistant. The project aims to improve ease of accessibility to city services and information about city services by creating a text and voice channel to compliment existing web and telephone (311) channels.
 
 **Depricated Prototype:** http://chicago-assistant-depricated.herokuapp.com/
 
-### Current Functionality in Development
+#### Current Functionality in Development
  - Submit a pothole request
  - Submit a broken street light request
  - Submit a request for rodent baiting
 
+#### Join Us on Tuesdays at Chi Hack Night
+[]**Slack Channel**](https://chihacknight.slack.com/) #chivirtualassistant
 
-### Join Us At Chi Hack Night
-**Slack Channel** #chivirtualassistant
+#### Collaborative Tools
+[Google Drive](https://drive.google.com/drive/u/1/folders/1DqmKrKWWF3-UyAipF8fifp9cPf-4Dn4S)  
+[Trello Board](https://trello.com/b/6EPQugQN/chicago-virtual-assistant)
 
 
 
-# Getting Started [Mac OS]
+# Getting Started
+Admittedly, installing everything you need to run the project locally can be a little difficult. If you want to be brave and install everything within a virtual environment on your local machine, you can follow [Rasa's Installation Instructions](https://rasa.com/docs/core/installation/)
 
-## Installing Docker
+If you want to bypass that pain, I invite you to use the Docker image we've built, assuming you are familiar with Docker or want to be! If you decide to install from scratch, you can skip the Docker instructions.
+
+## Getting Started with Docker [MacOS]
 Install Docker  
-
 `brew cask install docker`
 
 Once it's done installing, open up the application Launcher and start Docker. You'll be prompted for your password to complete the installation.
@@ -51,7 +54,7 @@ If you already have the repository cloned to your computer, copy the get-started
 ## Create Your Own Branch
 Create your own branch by running (**NOTE: do not use the brackets**):  
 
-`git branch [yourname]-dev`  
+`git branch [yourname]-dev`
 
 Switch to your newly created branch:  
 
