@@ -71,7 +71,7 @@ preshed==1.0.1
 prompt-toolkit==1.0.15
 protobuf==3.6.1
 ptyprocess==0.6.0
-Pygments==2.2.0
+Pygments==2.7.4
 PyHamcrest==1.9.0
 PyJWT==1.6.4
 pykwalify==1.6.0
