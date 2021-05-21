@@ -100,7 +100,7 @@ slackclient==1.2.1
 spacy==2.0.12
 tabulate==0.8.2
 tensorboard==1.8.0
-tensorflow==1.8.0
+tensorflow==2.5.0
 termcolor==1.1.0
 thinc==6.10.3
 toolz==0.9.0
