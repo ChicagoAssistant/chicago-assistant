@@ -86,7 +86,7 @@ rasa-core==0.10.4
 rasa-nlu==0.13.1
 redis==2.10.6
 regex==2017.4.5
-requests==2.19.1
+requests==2.20.0
 ruamel.yaml==0.15.59
 s3transfer==0.1.13
 scikit-learn==0.19.2
